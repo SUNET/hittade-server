@@ -1,7 +1,7 @@
 {% for host in hosts %}
 
 <p>
-<h2>{{ host.hostname }}</h2>
+    <a href="{% url 'servers:host' host.id %}"> {{ host.hostname }}</a>
 </p>
 
 {% endfor %}

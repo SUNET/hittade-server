@@ -22,6 +22,9 @@ def package(request, pk):
     package = Package.objects.get(pk=pk)
     hosts ={hostdetails.host for hostdetails in  HostDetails.objects.filter(packages=package)}
     return render(request, "servers/package.html", {"package": package, "hosts": hosts})
+def host(request, pk):
+    host = Host.objects.get(pk=pk)
+    return render(request, "servers/host.html", {"host": host})
 
 def search(request):
     # if this is a POST request we need to process the form data
