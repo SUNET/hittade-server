@@ -1,0 +1,11 @@
+<form action="{% url 'servers:search' %}" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Submit">
+</form>
+
+{% for package in data.packages %}
+
+<p><a href="{% url 'servers:package' package.id %}">{{ package.name }} - {{ package.version }}</a></p>
+
+{% endfor %}
