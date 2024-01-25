@@ -32,6 +32,8 @@ class Command(BaseCommand):
         osrelease = values["os"]["release"]["full"]
         rkr = values["running-kernel"]["kernel-release"]
         cosmosrepourl = values.get("cosmos_repo_origin_url", None)
+        ipv4 = values.get("ipaddress", None)
+        ipv6 = values.get("ipaddress6", None)
         # First get/save the host
         host, _ = Host.objects.get_or_create(
             hostname=hostname,
@@ -40,6 +42,8 @@ class Command(BaseCommand):
             osrelease=osrelease,
             rkr=rkr,
             cosmosrepourl=cosmosrepourl,
+            ipv4=ipv4,
+            ipv6=ipv6
         )
 
         hdetails = HostDetails(host=host, time=created_at)
