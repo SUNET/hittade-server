@@ -3,14 +3,15 @@ from django.shortcuts import render
 # Create your views here.
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
 
-from .forms import PackageForm
-from .models import Package, HostDetails, Host
+from django.db.models import OuterRef, Subquery
+from .forms import SearchForm
+from .models import Package, Host, HostPackages
+
 
 def index(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
+    return render(request, "servers/index.html")
+
 
 @csrf_exempt
 def add(request):
@@ -18,37 +19,70 @@ def add(request):
         return HttpResponse("received a POST request")
     return HttpResponse("h")
 
+
 def package(request, pk):
     package = Package.objects.get(pk=pk)
-    hosts ={hostdetails.host for hostdetails in  HostDetails.objects.filter(packages=package)}
-    return render(request, "servers/package.html", {"package": package, "hosts": hosts})
+    latest_host_details_subquery = (
+        HostPackages.objects.filter(host=OuterRef("pk"))
+        .order_by("-time")
+        .values("pk")[:1]
+    )
+    hosts_with_package = Host.objects.filter(
+        hostpackages__pk__in=Subquery(latest_host_details_subquery),
+        hostpackages__packages=package,
+    ).distinct()
+    return render(
+        request,
+        "servers/package.html",
+        {"package": package, "hosts": hosts_with_package},
+    )
+
+
 def host(request, pk):
     host = Host.objects.get(pk=pk)
-    return render(request, "servers/host.html", {"host": host})
+    host_packages = HostPackages.objects.filter(host=host).order_by("-time")[0]
+    return render(
+        request,
+        "servers/host.html",
+        {"host": host, "packages": host_packages.packages.all()},
+    )
+
 
 def search(request):
     # if this is a POST request we need to process the form data
     data = {}
+    text = ""
     if request.method == "POST":
         # create a form instance and populate it with data from the request:
-        form = PackageForm(request.POST)
+        form = SearchForm(request.POST)
         # check whether it's valid:
         if form.is_valid():
             # process the data in form.cleaned_data as required
             # ...
             # redirect to a new URL:
-            package_name = form.data["package_name"]
-            package_version = form.data["package_version"]
-            if not package_version:
-                packages = Package.objects.filter(name__icontains=package_name)
+            text = form.data["search"]
+            if form.data["stype"] == "package":
+                search_text = form.data["search"]
+                words = search_text.split(" ")
+                package_name = words[0]
+                if len(words) == 1:
+                    packages = Package.objects.filter(name__icontains=package_name)
+                else:
+                    package_version = words[1]
+                    packages = Package.objects.filter(
+                        name__icontains=package_name, version__icontains=package_version
+                    )
+                data["packages"] = packages
+                print(f"LEN {packages}")
             else:
-                packages = Package.objects.filter(name__icontains=package_name, version__icontains=package_version)
-            data["packages"] = packages
-            print(f"LEN {packages}")
-
-
+                search_text = form.data["search"]
+                search_text = search_text.strip()
+                hosts = Host.objects.filter(hostname__icontains=search_text)
+                data["hosts"] = hosts
     # if a GET (or any other method) we'll create a blank form
     else:
-        form = PackageForm()
+        form = SearchForm()
 
-    return render(request, "servers/search.html", {"form": form, "data": data})
+    return render(
+        request, "servers/search.html", {"form": form, "data": data, "text": text}
+    )

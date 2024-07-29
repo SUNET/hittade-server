@@ -1,11 +1,63 @@
-<form action="{% url 'servers:search' %}" method="post">
-    {% csrf_token %}
-    {{ form }}
-    <input type="submit" value="Submit">
-</form>
+{% extends "servers/base.html" %}
+{% block title %}Search Page{% endblock %}
 
-{% for package in data.packages %}
 
-<p><a href="{% url 'servers:package' package.id %}">{{ package.name }} - {{ package.version }}</a></p>
+{% block content %}
+<header class="m-5">
+    <form action="{% url 'servers:search' %}" method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="id_search" class="form-label">Search</label>
+            <input type="text" class="form-control form-control-lg" id="id_search" aria-describedby="Search term"
+                name="search">
+        </div>
+        <select class="form-control form-select-lg" aria-label="Searching for package or host" name="stype" id="stype">
+            <option value="package">Package</option>
+            <option value="host">Host</option>
+        </select>
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+        </div>
+    </form>
+</header>
 
-{% endfor %}
+
+<div class="m-5">
+    {% if data.packages %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Version</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for package in data.packages %}
+            <tr>
+                <td><a href="{% url 'servers:package' package.id %}">{{ package.name }} </a></td>
+                <td>{{ package.version }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if data.hosts %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Host name</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for host in data.hosts %}
+            <tr>
+                <td> <a href="{% url 'servers:host' host.id %}">{{ host.hostname }}</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+
+{% endblock %}

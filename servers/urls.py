@@ -8,4 +8,5 @@ urlpatterns = [
     path("add/", views.add, name="add"),
     path("package/<int:pk>", views.package, name="package"),
     path("host/<int:pk>", views.host, name="host"),
-    path("search/", views.search, name="search"),]
+    path("search/", views.search, name="search"),
+]
