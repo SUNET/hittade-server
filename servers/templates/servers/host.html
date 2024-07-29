@@ -1,2 +1,35 @@
-<p>You are viewing details of {{ host.hostname }}</p>
-It is running Kernel {{ host.rkr }} using {{ host.osname }} {{ host.osrelease }}.
+{% extends "servers/base.html" %}
+{% block title %}Host details{% endblock %}
+
+{% block content %}
+<div class="container-md m-5">
+    <p class="h2"> You are viewing details of
+        {{ host.hostname }}
+    </p>
+</div>
+<div class="container-md m-5">
+    <p class="h3">Current package list</p>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Package name</th>
+                <th scope="col">Package version</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for package in packages %}
+            <tr>
+                <td>{{ package.name }}</td>
+                <td>{{ package.version }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
+
+<!-- It is running Kernel {{ host.rkr }} using {{ host.osname }} {{ host.osrelease }}.
+
+<p>Domain: {{ host.domain }}</p>
+<p>Cosmos URL: {{ host.cosmosrepourl }}</p> -->

@@ -1,7 +1,22 @@
-{% for host in hosts %}
+{% extends "servers/base.html" %}
+{% block title %}Package details{% endblock %}
 
-<p>
-    <a href="{% url 'servers:host' host.id %}"> {{ host.hostname }}</a>
-</p>
+{% block content %}
+<div class="container-md">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Host name</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for host in hosts %}
+            <tr>
+                <td><a href="{% url 'servers:host' host.id %}">{{ host.hostname }} </a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
-{% endfor %}
+{% endblock %}
