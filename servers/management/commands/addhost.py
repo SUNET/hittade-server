@@ -146,8 +146,9 @@ class Command(BaseCommand):
         hcontainers.save()
 
         # Now save the host details
-        hostdetails, _ = HostDetails.objects.get_or_create(
+        hostdetails = HostDetails.objects.create(
             host=host,
+            time=created_at,
             domain=domain,
             osname=osname,
             osrelease=osrelease,

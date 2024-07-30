@@ -10,6 +10,7 @@ class Host(models.Model):
 
 class HostDetails(models.Model):
     host = models.ForeignKey(Host, on_delete=models.CASCADE)
+    time = models.DateTimeField()
     domain = models.CharField(max_length=255, null=True, blank=True)
     osname = models.CharField(max_length=100, null=True, blank=True)
     osrelease = models.CharField(max_length=255, null=True, blank=True)

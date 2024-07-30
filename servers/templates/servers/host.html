@@ -8,6 +8,40 @@
     </p>
 </div>
 <div class="container-md m-5">
+    <h3>OS details</h3>
+    <table class="table table-striped">
+        <tbody>
+            <tr>
+                <td>OS Name</td>
+                <td>{{ details.osname }}</td>
+            </tr>
+            <tr>
+                <td>OS Release</td>
+                <td>{{ details.osrelease }}</td>
+            </tr>
+            <tr>
+                <td>Domain</td>
+                <td>{{ details.domain }}</td>
+            </tr>
+            <tr>
+                <td>Kernel version</td>
+                <td>{{ details.rkr }}</td>
+            </tr>
+            <tr>
+                <td>IPv4</td>
+                <td>{{ details.ipv4 }}</td>
+            </tr>
+            <tr>
+                <td>IPv6</td>
+                <td>{{ details.ipv6 }}</td>
+            </tr>
+
+
+        </tbody>
+    </table>
+
+</div>
+<div class="container-md m-5">
     <p class="h3">Current package list</p>
     <table class="table table-striped">
         <thead>
