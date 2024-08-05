@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from django.db.models import OuterRef, Subquery
 from .forms import SearchForm
-from .models import Package, Host, HostPackages
+from .models import Package, Host, HostPackages, HostContainers, HostDetails
 
 
 def index(request):
@@ -41,10 +41,18 @@ def package(request, pk):
 def host(request, pk):
     host = Host.objects.get(pk=pk)
     host_packages = HostPackages.objects.filter(host=host).order_by("-time")[0]
+    host_containers = HostContainers.objects.filter(host=host).order_by("-time")[0]
+    details = HostDetails.objects.filter(host=host).order_by("-time")[0]
+
     return render(
         request,
         "servers/host.html",
-        {"host": host, "packages": host_packages.packages.all()},
+        {
+            "host": host,
+            "packages": host_packages.packages.all(),
+            "containers": host_containers.containers.all(),
+            "details": details,
+        },
     )
 
 
@@ -73,7 +81,6 @@ def search(request):
                         name__icontains=package_name, version__icontains=package_version
                     )
                 data["packages"] = packages
-                print(f"LEN {packages}")
             else:
                 search_text = form.data["search"]
                 search_text = search_text.strip()
