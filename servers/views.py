@@ -42,6 +42,7 @@ def host(request, pk):
     host = Host.objects.get(pk=pk)
     host_packages = HostPackages.objects.filter(host=host).order_by("-time")[0]
     host_containers = HostContainers.objects.filter(host=host).order_by("-time")[0]
+    containers = host_containers.containers.all()
     details = HostDetails.objects.filter(host=host).order_by("-time")[0]
 
     return render(
@@ -50,7 +51,7 @@ def host(request, pk):
         {
             "host": host,
             "packages": host_packages.packages.all(),
-            "containers": host_containers.containers.all(),
+            "containers": containers,
             "details": details,
         },
     )

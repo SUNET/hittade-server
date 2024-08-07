@@ -6,6 +6,7 @@ from servers.models import (
     HostPackages,
     HostContainers,
     ContainerImage,
+    HostContainersThrough,
 )
 from django.utils.dateparse import parse_datetime
 import orjson
@@ -41,6 +42,8 @@ class Command(BaseCommand):
                                 f"Error processing file: {filename}: {str(e)}"
                             )
                         )
+        else:
+            self.add_host_details(filename)
 
     def add_host_details(self, filename):
         "Parses and stores data on database."
@@ -128,25 +131,19 @@ class Command(BaseCommand):
         # Save the running containers on the host
         hcontainers = HostContainers(host=host, time=created_at)
         hcontainers.save()
-        containers = []
 
-        for container in values.get("containers", []):
+        for container in values.get("docker_ps", []):
             image = container["Image"]
-            image_id = container["ImageId"]
-            if image_id in CONTAINERS:
-                c = CONTAINERS[image_id]
-            else:
-                c, _ = ContainerImage.objects.get_or_create(
-                    image=image, imageid=image_id
-                )
-                CONTAINERS[image_id] = c
-            containers.append(c)
-        # Now save all containers
-        hcontainers.containers.add(*containers)
-        hcontainers.save()
+            image_id = container.get("ImageId", "not_available")
+            c, _ = ContainerImage.objects.get_or_create(image=image, imageid=image_id)
+            # Save the container details
+            hct = HostContainersThrough(
+                hc=hcontainers, container=c, name=container["Names"]
+            )
+            hct.save()
 
         # Now save the host details
-        hostdetails = HostDetails.objects.create(
+        HostDetails.objects.create(
             host=host,
             time=created_at,
             domain=domain,

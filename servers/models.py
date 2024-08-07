@@ -1,7 +1,5 @@
 # Create your models here.
-import datetime
 from django.db import models
-from django.utils import timezone
 
 
 class Host(models.Model):
@@ -42,4 +40,14 @@ class ContainerImage(models.Model):
 class HostContainers(models.Model):
     time = models.DateTimeField()
     host = models.ForeignKey(Host, on_delete=models.CASCADE)
-    containers = models.ManyToManyField(ContainerImage())
+    containers = models.ManyToManyField(
+        ContainerImage,
+        through="HostContainersThrough",
+        through_fields=("hc", "container"),
+    )
+
+
+class HostContainersThrough(models.Model):
+    hc = models.ForeignKey(HostContainers, on_delete=models.CASCADE)
+    container = models.ForeignKey(ContainerImage, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
