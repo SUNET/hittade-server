@@ -24,8 +24,11 @@
                 <td>{{ details.domain }}</td>
             </tr>
             <tr>
-                <td>Kernel version</td>
-                <td>{{ details.rkr }}</td>
+                <td>Fail2Ban</td>
+                <td>{% if details.fail2ban %} <span class="badge text-bg-success">On</span><span
+                        class="visually-hidden">On</span>
+                    {% else %} <span class="badge text-bg-warning">Off</span><span class="visually-hidden">Off</span>
+                    {% endif %}</td>
             </tr>
             <tr>
                 <td>IPv4</td>
@@ -34,6 +37,10 @@
             <tr>
                 <td>IPv6</td>
                 <td>{{ details.ipv6 }}</td>
+            </tr>
+            <tr>
+                <td>Kernel version</td>
+                <td>{{ details.rkr }}</td>
             </tr>
 
 
@@ -51,7 +58,7 @@
             </svg>
         </div>
         <div class="col col-11">
-            <h3 class="md-2">Running containers: <span class="badge text-bg-success">{{ containers|length }}
+            <h3 class="md-2">Running containers: <span class="badge text-bg-info">{{ containers|length }}
                 </span></h3>
         </div>
     </div>

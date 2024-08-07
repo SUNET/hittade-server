@@ -16,6 +16,7 @@ class HostDetails(models.Model):
     cosmosrepourl = models.CharField(max_length=255, null=True, blank=True)
     ipv4 = models.CharField(max_length=255, null=True, blank=True)
     ipv6 = models.CharField(max_length=300, null=True, blank=True)
+    fail2ban = models.BooleanField(default=False)
 
 
 class Package(models.Model):

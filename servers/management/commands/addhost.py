@@ -82,6 +82,12 @@ class Command(BaseCommand):
             cosmosrepourl = values.get("cosmos_repo_origin_url", None)
             ipv4 = values.get("ipaddress", None)
             ipv6 = values.get("ipaddress6", None)
+            fail2ban_text = values.get("fail2ban_is_enabled", "no").lower().strip()
+            if fail2ban_text == "no":
+                fail2ban = False
+            else:
+                fail2ban = True
+
         except KeyError:
             self.stderr.write(self.style.ERROR(f"Invalid input in file: {filename}"))
             return
@@ -153,6 +159,7 @@ class Command(BaseCommand):
             cosmosrepourl=cosmosrepourl,
             ipv4=ipv4,
             ipv6=ipv6,
+            fail2ban=fail2ban,
         )
 
         self.stdout.write(self.style.SUCCESS(f"Successfully added {hostname}"))
