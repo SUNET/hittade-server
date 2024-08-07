@@ -1,0 +1,23 @@
+{% extends "servers/base.html" %}
+{% block title %}All hosts{% endblock %}
+
+
+{% block content %}
+<div class="m-5">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Host name</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for host in hosts %}
+            <tr>
+                <td> <a href="{% url 'servers:host' host.id %}">{{ host.hostname }}</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
