@@ -34,6 +34,14 @@
                     <li class="nav-item">
                         <a href="{% url 'servers:hosts' %}" class="nav-link">List of all hosts</a>
                     </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-light">Logout</button>
+                        </form>
+                    </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>

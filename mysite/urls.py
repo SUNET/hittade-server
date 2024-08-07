@@ -22,5 +22,6 @@ import servers.views
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("servers/", include("servers.urls")),
-    path("", servers.views.search, name="index")
+    path("", servers.views.search, name="index"),
+ path("accounts/", include("django.contrib.auth.urls")),
 ] + debug_toolbar_urls()
