@@ -4,7 +4,10 @@ from django.db import models
 
 class Host(models.Model):
     hostname = models.CharField(max_length=200)
-
+    class Meta:
+        indexes = [
+            models.Index(fields=["hostname"]),
+        ]
 
 class HostDetails(models.Model):
     host = models.ForeignKey(Host, on_delete=models.CASCADE)
@@ -17,6 +20,14 @@ class HostDetails(models.Model):
     ipv4 = models.CharField(max_length=255, null=True, blank=True)
     ipv6 = models.CharField(max_length=300, null=True, blank=True)
     fail2ban = models.BooleanField(default=False)
+    class Meta:
+        indexes = [
+            models.Index(fields=["domain"]),
+            models.Index(fields=["osname", "osrelease"]),
+            models.Index(fields=["ipv4"]),
+            models.Index(fields=["ipv6"]),
+            models.Index(fields=["fail2ban"]),
+        ]
 
 
 class Package(models.Model):
@@ -25,6 +36,10 @@ class Package(models.Model):
 
     class Meta:
         unique_together = ("name", "version")
+        indexes = [
+            models.Index(fields=["name"]),
+            models.Index(fields=["name", "version"]),
+        ]
 
 
 class HostPackages(models.Model):
@@ -36,6 +51,12 @@ class HostPackages(models.Model):
 class ContainerImage(models.Model):
     image = models.CharField(max_length=100)
     imageid = models.CharField(max_length=255)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["image"]),
+            models.Index(fields=["imageid"]),
+        ]
 
 
 class HostContainers(models.Model):
