@@ -1,9 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 # Create your views here.
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
 from django.db.models import OuterRef, Subquery
 from .forms import SearchForm
 from .models import Package, Host, HostPackages, HostContainers, HostDetails
@@ -13,11 +14,18 @@ def index(request):
     return render(request, "servers/index.html")
 
 
+def logout_view(request):
+    # FIXME: Handle CSRF token validation
+    logout(request)
+    return redirect(index)
+
+
 @csrf_exempt
 def add(request):
     if request.method == "POST":
         return HttpResponse("received a POST request")
     return HttpResponse("h")
+
 
 @login_required
 def package(request, pk):
@@ -37,6 +45,7 @@ def package(request, pk):
         {"package": package, "hosts": hosts_with_package},
     )
 
+
 @login_required
 def host(request, pk):
     host = Host.objects.get(pk=pk)
@@ -55,6 +64,7 @@ def host(request, pk):
             "details": details,
         },
     )
+
 
 @login_required
 def search(request):
@@ -95,9 +105,9 @@ def search(request):
         request, "servers/search.html", {"form": form, "data": data, "text": text}
     )
 
+
 @login_required
 def hosts(request):
     "To show list of all hosts."
     hosts = Host.objects.all().order_by("hostname")
-    return render (request, "servers/hosts.html", {"hosts": hosts})
-    
+    return render(request, "servers/hosts.html", {"hosts": hosts})
