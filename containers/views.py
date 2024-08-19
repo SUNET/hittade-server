@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import OuterRef, Subquery
+from django.core.paginator import Paginator
 import datetime
 import pytz
 from .forms import SearchForm
@@ -51,7 +52,21 @@ def cbase(request, cid):
     return render(request, "containers/container.html", {"cb": cb, "tags": cb.tags.all(), "packages": cb.packages.all()})
 
 def containers(request):
-    return render(request, "containers/search.html")
+    cbs = ContainerBase.objects.prefetch_related("tags").order_by("-ctime")
+    paginator = Paginator(cbs, 50)
+
+    page_number = request.GET.get("page", 1)
+    page_number = int(page_number)
+    if page_number < 1:
+        page_number = 1
+    elif page_number > paginator.num_pages:
+        page_number = paginator.num_pages
+
+    page = paginator.page(page_number)
+    result = []
+    for cb in page.object_list:
+        result.append({"fullname": cb.tags.all()[0].fullname, "cid": cb.cid})
+    return render(request, "containers/containers.html", {"cbs": result})
 
 
 @login_required
