@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-
+from django.db.models import OuterRef, Subquery
+import datetime
+import pytz
 from .forms import SearchForm
 from .models import Container, ContainerPackage, ContainerTags, ContainerBase
 # Create your views here.
@@ -12,7 +14,33 @@ def index(request):
 
 
 def package(request, pk):
-    return render(request, "containers/search.html")
+    package = ContainerPackage.objects.get(pk=pk)
+    cbs = ContainerBase.objects.filter(packages=package)
+    # FIXME: Someone please do this via DB query.
+    # Maybe that will be faster.
+    start = datetime.datetime.fromtimestamp(0, pytz.utc)
+    initial_result = {}
+    cache = {}
+    for cb in cbs:
+        time = cache.get(cb.container.cname, start)
+        if time < cb.time:
+            initial_result[cb.container.cname] = cb
+            cache[cb.container.cname] = cb.time
+
+    # Now construct the data
+    result = []
+    for val in initial_result.values():
+        data = {}
+        for tag in val.tags.all():
+            data["fullname"] = tag.fullname
+            data["cid"] = val.cid
+        result.append(data)
+
+    return render(
+        request,
+        "containers/package.html",
+        {"package": package, "data": result},
+    ) 
 
 
 def cbase(request, cid: str=""):
