@@ -1,0 +1,71 @@
+{% extends "servers/base.html" %}
+{% block title %}Search Page{% endblock %}
+
+
+{% block content %}
+<header class="m-5">
+    <div class="md-5">
+        <h2 class="d-flex align-items-center justify-content-center">Containers Search</h2>
+    </div>
+    <form action="{% url 'containers:search' %}" method="post">
+        {% csrf_token %}
+        <div class="col-6 offset-3">
+            <div class="input-group input-group-lg">
+                <span class="input-group-text rounded-start-5">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input type="text" class="form-control" id="id_serach" name="search">
+                <div class="col-xs-1">
+                    <select class="form-select form-select-lg rounded-end-5" aria-label="Searching for package or host"
+                        name="stype" id="stype">
+                        <option value="container">Container</option>
+                        <option value="package">Package</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+    </form>
+
+</header>
+
+
+<div class="m-5">
+    {% if data.packages %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Version</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for package in data.packages %}
+            <tr>
+                <td><a href="{% url 'containers:package' package.id %}">{{ package.name }} </a></td>
+                <td>{{ package.version }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if data.cbs %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Container</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cb in data.cbs %}
+            <tr>
+                <td> <a href="{% url 'containers:cbase' cb.cid %}">{{ cb.fullname }}</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+
+{% endblock %}

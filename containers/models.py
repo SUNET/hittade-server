@@ -34,6 +34,7 @@ class ContainerBase(models.Model):
     osname = models.CharField(max_length=255, null=True)
     osversionid = models.CharField(max_length=255, null=True)
     time = models.DateTimeField()
+    ctime = models.DateTimeField()
     tags = models.ManyToManyField(ContainerTags)
     packages = models.ManyToManyField(ContainerPackage)
 

@@ -18,16 +18,17 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         filename = options["filename"]
-        ctime = datetime.now()
+        # This is the time data is entered in the database.
+        itime = datetime.now()
         p = pathlib.Path(filename)
         if p.is_dir():
             # We have a directory of files.
             for filename in p.rglob("*.json"):
-                self.add_container_images(filename, ctime)
+                self.add_container_images(filename, itime)
         else:
-            self.add_container_images(filename, ctime)
+            self.add_container_images(filename, itime)
 
-    def add_container_images(self, filename, ctime):
+    def add_container_images(self, filename, itime):
         "Parses and stores data on database."
         self.stdout.write(self.style.SUCCESS(f"Parsing {filename}"))
         # These variables to be used for speedup
@@ -48,6 +49,7 @@ class Command(BaseCommand):
         try:
             image_data = data["inspect_data"][0]
             cid = image_data["Id"]
+            ctime = image_data["Created"]
             repotags = image_data["RepoTags"]
         except KeyError:
             self.stderr.write(self.style.ERROR(f"Invalid input in file: {filename}"))
@@ -75,7 +77,7 @@ class Command(BaseCommand):
         # Save the container name part
         c, _ = Container.objects.get_or_create(cname=cname)
         # Save the containerbase details
-        cb = ContainerBase(cid=cid, container=c, osname=osname, osversionid=osversion, time=ctime)
+        cb = ContainerBase(cid=cid, container=c, osname=osname, osversionid=osversion, time=itime, ctime=ctime)
         cb.save()
 
         tags = []
