@@ -43,8 +43,12 @@ def package(request, pk):
     ) 
 
 
-def cbase(request, cid: str=""):
-    return render(request, "containers/search.html")
+def cbase(request, cid):
+    try:
+        cb = ContainerBase.objects.get(cid=cid)
+    except ContainerBase.DoesNotExist:
+        return render(request, "containers/container.html", {"error": "Container not found."})
+    return render(request, "containers/container.html", {"cb": cb, "tags": cb.tags.all(), "packages": cb.packages.all()})
 
 def containers(request):
     return render(request, "containers/search.html")
