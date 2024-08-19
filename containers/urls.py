@@ -8,4 +8,5 @@ urlpatterns = [
     path("package/<int:pk>", views.package, name="package"),
     path("search/", views.search, name="search"),
     path("cbase/<str:cid>", views.cbase, name="cbase"),
+    path("containers", views.containers, name="containers"),
 ]

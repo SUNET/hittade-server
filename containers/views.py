@@ -18,6 +18,8 @@ def package(request, pk):
 def cbase(request, cid: str=""):
     return render(request, "containers/search.html")
 
+def containers(request):
+    return render(request, "containers/search.html")
 
 
 @login_required
