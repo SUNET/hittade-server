@@ -37,6 +37,7 @@ INTERNAL_IPS = [
 
 INSTALLED_APPS = [
     "servers.apps.ServersConfig",
+    "containers.apps.ContainersConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -85,7 +86,7 @@ WSGI_APPLICATION = "mysite.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": BASE_DIR / "dbdir/db.sqlite3",
         # For SQLITE
     }
 }
