@@ -6,7 +6,7 @@ from django.core.paginator import Paginator
 import datetime
 import pytz
 from .forms import SearchForm
-from .models import Container, ContainerPackage, ContainerTags, ContainerBase
+from .models import ContainerPackage, ContainerTags, ContainerBase
 # Create your views here.
 
 
@@ -16,17 +16,17 @@ def index(request):
 
 def package(request, pk):
     package = ContainerPackage.objects.get(pk=pk)
-    cbs = ContainerBase.objects.filter(packages=package)
+    cbs = ContainerBase.objects.filter(packages=package).group_by("cname").order_by("-time")
     # FIXME: Someone please do this via DB query.
     # Maybe that will be faster.
     start = datetime.datetime.fromtimestamp(0, pytz.utc)
     initial_result = {}
     cache = {}
     for cb in cbs:
-        time = cache.get(cb.container.cname, start)
+        time = cache.get(cb.cname, start)
         if time < cb.time:
-            initial_result[cb.container.cname] = cb
-            cache[cb.container.cname] = cb.time
+            initial_result[cb.cname] = cb
+            cache[cb.cname] = cb.time
 
     # Now construct the data
     result = []
@@ -46,7 +46,7 @@ def package(request, pk):
 
 def cbase(request, cid):
     try:
-        cb = ContainerBase.objects.get(cid=cid)
+        cb = ContainerBase.objects.filter(cid=cid)[0]
     except ContainerBase.DoesNotExist:
         return render(request, "containers/container.html", {"error": "Container not found."})
     return render(request, "containers/container.html", {"cb": cb, "tags": cb.tags.all(), "packages": cb.packages.all()})

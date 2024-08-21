@@ -2,13 +2,9 @@ from django.db import models
 
 # Create your models here.
 
-class Container(models.Model):
-    cname = models.CharField(max_length=255)
-
 class ContainerTags(models.Model):
     tag = models.CharField(max_length=255)
     fullname = models.CharField(max_length=255)
-    container = models.ForeignKey(Container, on_delete=models.CASCADE)
     class Meta:
         indexes = [
             models.Index(fields=["tag"]),
@@ -30,7 +26,7 @@ class ContainerPackage(models.Model):
 
 class ContainerBase(models.Model):
     cid = models.CharField(max_length=255)
-    container = models.ForeignKey(Container, on_delete=models.CASCADE)
+    cname = models.CharField(max_length=255)
     osname = models.CharField(max_length=255, null=True)
     osversionid = models.CharField(max_length=255, null=True)
     time = models.DateTimeField()

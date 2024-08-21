@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.utils.dateparse import parse_datetime
-from containers.models import Container, ContainerTags, ContainerBase, ContainerPackage
+from containers.models import ContainerTags, ContainerBase, ContainerPackage
 import orjson
 import pathlib
 from datetime import datetime
@@ -74,10 +74,8 @@ class Command(BaseCommand):
             return
 
 
-        # Save the container name part
-        c, _ = Container.objects.get_or_create(cname=cname)
         # Save the containerbase details
-        cb = ContainerBase(cid=cid, container=c, osname=osname, osversionid=osversion, time=itime, ctime=ctime)
+        cb = ContainerBase(cid=cid, cname=cname, osname=osname, osversionid=osversion, time=itime, ctime=ctime)
         cb.save()
 
         tags = []
@@ -85,7 +83,7 @@ class Command(BaseCommand):
         for fulltag in repotags:
             words = fulltag.split(":")
             tag = words[0]
-            ct, _ = ContainerTags.objects.get_or_create(tag=tag, fullname=fulltag, container=c)
+            ct, _ = ContainerTags.objects.get_or_create(tag=tag, fullname=fulltag)
             tags.append(ct)
         cb.tags.add(*tags)
         cb.save()
