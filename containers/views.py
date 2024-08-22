@@ -65,7 +65,7 @@ def containers(request):
     result = []
     for cb in page.object_list:
         result.append({"fullname": cb.tags.all()[0].fullname, "cid": cb.cid})
-    return render(request, "containers/containers.html", {"cbs": result})
+    return render(request, "containers/containers.html", {"cbs": result, "page": page})
 
 
 @login_required
