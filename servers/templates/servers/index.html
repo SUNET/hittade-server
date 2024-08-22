@@ -3,7 +3,17 @@
 
 {% block content %}
 <div class="container-md">
-    <h1><a href="{% url 'servers:search' %}">Search</a></h1>
+    <div class="m-5">
+        <p class="md-5">This is a web application to search across our Infrastructure for read only data.</p>
+
+        <p>Using the left hand side menu you can either search across all the hosts we manage, or in the list of
+            containers we manage. Search for a particular package and see which all servers/hosts have it right now. You
+            can also find the latest containers with a particular package.
+        <p>
+        <div class="alert alert-danger" role="alert">
+            After you login for the first time, you will have to inform Kushal (for the test server) to give you access.
+        </div>
+    </div>
 </div>
 
 {% endblock %}
