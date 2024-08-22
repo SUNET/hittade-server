@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 # Create your views here.
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth import logout
 from django.db.models import OuterRef, Subquery
 from .forms import SearchForm
@@ -19,15 +19,8 @@ def logout_view(request):
     logout(request)
     return redirect(index)
 
-
-@csrf_exempt
-def add(request):
-    if request.method == "POST":
-        return HttpResponse("received a POST request")
-    return HttpResponse("h")
-
-
 @login_required
+@permission_required("servers.view_host", raise_exception=True)
 def package(request, pk):
     package = Package.objects.get(pk=pk)
     latest_host_details_subquery = (
@@ -47,6 +40,7 @@ def package(request, pk):
 
 
 @login_required
+@permission_required("servers.view_host", raise_exception=True)
 def host(request, pk):
     host = Host.objects.get(pk=pk)
     host_packages = HostPackages.objects.filter(host=host).order_by("-time")[0]
@@ -67,6 +61,7 @@ def host(request, pk):
 
 
 @login_required
+@permission_required("servers.view_host", raise_exception=True)
 def search(request):
     # if this is a POST request we need to process the form data
     data = {}
@@ -107,6 +102,7 @@ def search(request):
 
 
 @login_required
+@permission_required("servers.view_host", raise_exception=True)
 def hosts(request):
     "To show list of all hosts."
     hosts = Host.objects.all().order_by("hostname")

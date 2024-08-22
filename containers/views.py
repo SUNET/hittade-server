@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import OuterRef, Subquery
 from django.core.paginator import Paginator
 import datetime
@@ -11,6 +11,8 @@ from .utils import latest_containers
 # Create your views here.
 
 
+@login_required
+@permission_required("containers.view_containerbase", raise_exception=True)
 def index(request):
     return render(request, "containers/search.html")
 
@@ -36,6 +38,8 @@ def package(request, pk):
     ) 
 
 
+@login_required
+@permission_required("containers.view_containerbase", raise_exception=True)
 def cbase(request, cid):
     "Shows details of a specific container image based on it's container ID."
     try:
@@ -44,6 +48,8 @@ def cbase(request, cid):
         return render(request, "containers/container.html", {"error": "Container not found."})
     return render(request, "containers/container.html", {"cb": cb, "tags": cb.tags.all(), "packages": cb.packages.all()})
 
+@login_required
+@permission_required("containers.view_containerbase", raise_exception=True)
 def containers(request):
     cbs = ContainerBase.objects.prefetch_related("tags").order_by("-ctime")
     paginator = Paginator(cbs, 50)
@@ -63,6 +69,7 @@ def containers(request):
 
 
 @login_required
+@permission_required("containers.view_containerbase", raise_exception=True)
 def search(request):
     # if this is a POST request we need to process the form data
     data = {}
