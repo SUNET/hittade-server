@@ -37,7 +37,12 @@
                     {{ cb.cid }}
                 </td>
             </tr>
-
+            <tr>
+                <td>Created At</td>
+                <td>
+                    {{ cb.ctime|date:"r" }}
+                </td>
+            </tr>
 
         </tbody>
     </table>

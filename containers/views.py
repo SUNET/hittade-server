@@ -7,6 +7,7 @@ import datetime
 import pytz
 from .forms import SearchForm
 from .models import ContainerPackage, ContainerTags, ContainerBase
+from .utils import latest_containers
 # Create your views here.
 
 
@@ -16,25 +17,16 @@ def index(request):
 
 def package(request, pk):
     package = ContainerPackage.objects.get(pk=pk)
-    cbs = ContainerBase.objects.filter(packages=package).group_by("cname").order_by("-time")
-    # FIXME: Someone please do this via DB query.
-    # Maybe that will be faster.
-    start = datetime.datetime.fromtimestamp(0, pytz.utc)
-    initial_result = {}
-    cache = {}
-    for cb in cbs:
-        time = cache.get(cb.cname, start)
-        if time < cb.time:
-            initial_result[cb.cname] = cb
-            cache[cb.cname] = cb.time
+    latest = latest_containers()
+    cbs = ContainerBase.objects.filter(packages=package, id__in=latest).prefetch_related()
 
     # Now construct the data
     result = []
-    for val in initial_result.values():
+    for cb in cbs:
         data = {}
-        for tag in val.tags.all():
+        for tag in cb.tags.all():
             data["fullname"] = tag.fullname
-            data["cid"] = val.cid
+            data["cid"] = cb.cid
         result.append(data)
 
     return render(
@@ -45,6 +37,7 @@ def package(request, pk):
 
 
 def cbase(request, cid):
+    "Shows details of a specific container image based on it's container ID."
     try:
         cb = ContainerBase.objects.filter(cid=cid)[0]
     except ContainerBase.DoesNotExist:

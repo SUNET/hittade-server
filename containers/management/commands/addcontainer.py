@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.utils.dateparse import parse_datetime
 from containers.models import ContainerTags, ContainerBase, ContainerPackage
+from containers.utils import update_latest_containers
 import orjson
 import pathlib
 from datetime import datetime
@@ -77,6 +78,8 @@ class Command(BaseCommand):
         # Save the containerbase details
         cb = ContainerBase(cid=cid, cname=cname, osname=osname, osversionid=osversion, time=itime, ctime=ctime)
         cb.save()
+        # We can now update the warm cache for latest containers
+        update_latest_containers(cname, cb.id, cb.ctime)
 
         tags = []
         # Save the tags

@@ -1,0 +1,7 @@
+django
+orjson
+black
+ruff
+redis
+django-extensions
+django-debug-toolbar
