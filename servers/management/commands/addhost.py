@@ -8,6 +8,7 @@ from servers.models import (
     ContainerImage,
     HostContainersThrough,
 )
+from servers.utils import update_latest_hosts
 from django.utils.dateparse import parse_datetime
 import orjson
 import pathlib
@@ -88,8 +89,10 @@ class Command(BaseCommand):
             else:
                 fail2ban = True
 
-        except KeyError:
-            self.stderr.write(self.style.ERROR(f"Invalid input in file: {filename}"))
+        except KeyError as e:
+            self.stderr.write(
+                self.style.ERROR(f"Invalid input in file: {filename} missing key {e}")
+            )
             return
         # First get/save the host
         host, _ = Host.objects.get_or_create(
@@ -149,7 +152,7 @@ class Command(BaseCommand):
             hct.save()
 
         # Now save the host details
-        HostDetails.objects.create(
+        hd = HostDetails.objects.create(
             host=host,
             time=created_at,
             domain=domain,
@@ -161,5 +164,6 @@ class Command(BaseCommand):
             ipv6=ipv6,
             fail2ban=fail2ban,
         )
+        update_latest_hosts(hd.host.hostname, hd.id, hd.time)
 
         self.stdout.write(self.style.SUCCESS(f"Successfully added {hostname}"))
