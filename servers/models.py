@@ -3,13 +3,17 @@ from django.db import models
 
 
 class Host(models.Model):
+    id: int
     hostname = models.CharField(max_length=200)
+
     class Meta:
         indexes = [
             models.Index(fields=["hostname"]),
         ]
 
+
 class HostDetails(models.Model):
+    id: int
     host = models.ForeignKey(Host, on_delete=models.CASCADE)
     time = models.DateTimeField()
     domain = models.CharField(max_length=255, null=True, blank=True)
@@ -20,6 +24,7 @@ class HostDetails(models.Model):
     ipv4 = models.CharField(max_length=255, null=True, blank=True)
     ipv6 = models.CharField(max_length=300, null=True, blank=True)
     fail2ban = models.BooleanField(default=False)
+
     class Meta:
         indexes = [
             models.Index(fields=["domain"]),
@@ -31,6 +36,7 @@ class HostDetails(models.Model):
 
 
 class Package(models.Model):
+    id: int
     name = models.CharField(max_length=255)
     version = models.CharField(max_length=255)
 
@@ -43,12 +49,14 @@ class Package(models.Model):
 
 
 class HostPackages(models.Model):
+    id: int
     time = models.DateTimeField()
     host = models.ForeignKey(Host, on_delete=models.CASCADE)
     packages = models.ManyToManyField(Package)
 
 
 class ContainerImage(models.Model):
+    id: int
     image = models.CharField(max_length=100)
     imageid = models.CharField(max_length=255)
 
@@ -60,6 +68,7 @@ class ContainerImage(models.Model):
 
 
 class HostContainers(models.Model):
+    id: int
     time = models.DateTimeField()
     host = models.ForeignKey(Host, on_delete=models.CASCADE)
     containers = models.ManyToManyField(
@@ -70,6 +79,7 @@ class HostContainers(models.Model):
 
 
 class HostContainersThrough(models.Model):
+    id: int
     hc = models.ForeignKey(HostContainers, on_delete=models.CASCADE)
     container = models.ForeignKey(ContainerImage, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
