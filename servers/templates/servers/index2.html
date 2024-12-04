@@ -1,0 +1,19 @@
+{% extends "servers/base.html" %}
+{% block title %}Welcome to server/host details page{% endblock %}
+
+{% block content %}
+<div class="container-md m-5">
+    {% for osd, values in osdetails.items %}
+    <details>
+        <summary class="h2">{{ osd }}</summary>
+        <div class="container-md m5">
+            {% for value in values %}
+            <ul class="list-group">
+                <li class="list-group-item"><a href="{% url 'servers:host' value.1 %}"> {{ value.0 }}</a></li>
+            </ul>
+            {% endfor %}
+        </div>
+    </details>
+    {% endfor %}
+</div>
+{% endblock %}

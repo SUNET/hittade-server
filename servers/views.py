@@ -1,13 +1,18 @@
-from django.shortcuts import render, redirect
+import json
+from typing import Any
+
+from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required, permission_required
+from django.db.models import OuterRef, Subquery
 
 # Create your views here.
 from django.http import HttpResponse
+from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required, permission_required
-from django.contrib.auth import logout
-from django.db.models import OuterRef, Subquery
+
 from .forms import SearchForm
-from .models import Package, Host, HostPackages, HostContainers, HostDetails
+from .models import Host, HostContainers, HostDetails, HostPackages, Package
+from .utils import get_osdetails
 
 
 def index(request):
@@ -18,6 +23,7 @@ def logout_view(request):
     # FIXME: Handle CSRF token validation
     logout(request)
     return redirect(index)
+
 
 @login_required
 @permission_required("servers.view_host", raise_exception=True)
@@ -107,3 +113,16 @@ def hosts(request):
     "To show list of all hosts."
     hosts = Host.objects.all().order_by("hostname")
     return render(request, "servers/hosts.html", {"hosts": hosts})
+
+
+@login_required
+@permission_required("servers.view_host", raise_exception=True)
+def index2(request):
+    osdetails: dict[Any, Any] = get_osdetails()
+    # HACK: To stop any error on the view for missing cache
+    if not osdetails:
+        osdetails = {}
+    data = {}
+    for k, v in osdetails.items():
+        data[k.decode("utf-8")] = json.loads(v)
+    return render(request, "servers/index2.html", {"osdetails": data})
