@@ -6,3 +6,22 @@ containers.
 
 ## LICENSE: BSD-3-Clause
 
+
+## Development setup
+
+```
+sudo systemctl start redis
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip instlal -r requirements-dev.txt
+```
+
+
+## How to add host information from the JSON files?
+
+```sh
+./manage.py addhost ../2024-12-03/hosts/
+```
+
+
+
