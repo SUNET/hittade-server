@@ -162,3 +162,6 @@ cython_debug/
 *.json
 *.prof
 db.sqlite*
+# local files
+*_prod.py
+

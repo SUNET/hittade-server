@@ -65,8 +65,9 @@
     <table class="table table-striped">
         <thead>
             <tr>
-                <th scope="col">Container name</th>
+                <th scope="col">Container Image</th>
                 <th scope="col">Image ID</th>
+                <th scope="col">Name</th>
             </tr>
         </thead>
         <tbody>
@@ -74,6 +75,7 @@
             <tr>
                 <td>{{ container.image }}</td>
                 <td>{{ container.imageid }}</td>
+                <td>{{ container.name }}</td>
             </tr>
             {% endfor %}
         </tbody>
