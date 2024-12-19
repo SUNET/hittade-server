@@ -13,9 +13,14 @@ containers.
 sudo systemctl start redis
 python3 -m venv .venv
 source .venv/bin/activate
-python3 -m pip instlal -r requirements-dev.txt
+python3 -m pip install -r requirements-dev.txt
 ```
 
+Alternatively, use Docker:
+```
+docker compose build web
+docker compose up
+```
 
 ## How to add host information from the JSON files?
 
