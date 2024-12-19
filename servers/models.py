@@ -33,6 +33,7 @@ class HostDetails(models.Model):
             models.Index(fields=["ipv6"]),
             models.Index(fields=["fail2ban"]),
         ]
+        ordering = ("-time",)
 
 
 class Package(models.Model):

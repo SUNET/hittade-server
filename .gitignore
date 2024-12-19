@@ -164,4 +164,5 @@ cython_debug/
 db.sqlite*
 # local files
 *_prod.py
-
+redis
+certificates

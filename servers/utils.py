@@ -1,6 +1,6 @@
 import json
 from datetime import datetime, timezone
-from typing import Any, List
+from typing import Any, Dict
 
 import redis
 from django.conf import settings
@@ -39,10 +39,11 @@ def save_osdetails(details: dict[str, list[Any]]):
     r.hmset("osdetails", db_dir)
 
 
-def get_osdetails():
+def get_osdetails() -> Dict[str, Any]:
     "Returns dictionary of all different osdetails"
     global r
-    return r.hgetall("osdetails")
+    data: Dict[str, Any] = r.hgetall("osdetails")
+    return data
 
 
 def latest_hostdetails() -> list:

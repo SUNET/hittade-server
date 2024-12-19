@@ -31,6 +31,7 @@ INTERNAL_IPS = [
     # ...
     "127.0.0.1",
     "localhost",
+    "10.89.0.21",
     # ...
 ]
 # Application definition
@@ -86,17 +87,23 @@ WSGI_APPLICATION = "hittade.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "dbdir/db.sqlite3",
+        # "ENGINE": "django.db.backends.sqlite3",
+        # "NAME": BASE_DIR / "dbdir/db.sqlite3",
         # For SQLITE
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "postgres",
+        "USER": "postgres",
+        "PASSWORD": "",
+        "HOST": "db",
+        "PORT": 5432,
     }
-# "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "OPTIONS": {
-#             "service": "my_service",
-#             "passfile": ".my_pgpass",
-#         },
-#     }
+    # "default": {
+    #         "ENGINE": "django.db.backends.postgresql",
+    #         "OPTIONS": {
+    #             "service": "my_service",
+    #             "passfile": ".my_pgpass",
+    #         },
+    #     }
 }
 
 
@@ -146,7 +153,7 @@ LOGOUT_REDIRECT_URL = "/"
 
 # For REDIS
 REDIS = {
-    "host": "localhost",
+    "host": "redis",
     "port": 6379,
     "db": 0,
 }

@@ -1,5 +1,5 @@
 import json
-from typing import Any
+from typing import Any, DefaultDict
 
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required, permission_required
@@ -118,11 +118,26 @@ def hosts(request):
 @login_required
 @permission_required("servers.view_host", raise_exception=True)
 def index2(request):
-    osdetails: dict[Any, Any] = get_osdetails()
-    # HACK: To stop any error on the view for missing cache
-    if not osdetails:
-        osdetails = {}
-    data = {}
-    for k, v in osdetails.items():
-        data[k.decode("utf-8")] = json.loads(v)
-    return render(request, "servers/index2.html", {"osdetails": data})
+    # osdetails: dict[Any, Any] = get_osdetails()
+    # # HACK: To stop any error on the view for missing cache
+    # if not osdetails:
+    # osdetails = {}
+    # data = {}
+    # for k, v in osdetails.items():
+    # data[k.decode("utf-8")] = json.loads(v)
+    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(",")[0]
+    else:
+        ip = request.META.get("REMOTE_ADDR")
+    print(ip)
+    data = DefaultDict(list)
+    hosts_with_all_details = (
+        Host.objects.order_by("-id").distinct().prefetch_related("hostdetails_set")
+    )
+    for host in hosts_with_all_details:
+        ld = host.hostdetails_set.first()  # pyright: ignore
+        osdetails = f"{ld.osname}-{ld.osrelease}"
+        data[osdetails].append((host.hostname, host.id))
+
+    return render(request, "servers/index2.html", {"osdetails": dict(data)})
