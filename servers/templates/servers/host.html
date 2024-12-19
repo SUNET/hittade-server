@@ -71,11 +71,11 @@
             </tr>
         </thead>
         <tbody>
-            {% for container in containers %}
+            {% for hc in containers %}
             <tr>
-                <td>{{ container.image }}</td>
-                <td>{{ container.imageid }}</td>
-                <td>{{ container.name }}</td>
+                <td>{{ hc.container.image }}</td>
+                <td>{{ hc.container.imageid }}</td>
+                <td>{{ hc.name }}</td>
             </tr>
             {% endfor %}
         </tbody>
