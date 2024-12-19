@@ -166,3 +166,4 @@ db.sqlite*
 *_prod.py
 redis
 certificates
+db*
