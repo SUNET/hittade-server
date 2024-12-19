@@ -9,14 +9,23 @@ containers.
 
 ## Development setup
 
-```
+```bash
 sudo systemctl start redis
 python3 -m venv .venv
 source .venv/bin/activate
-python3 -m pip instlal -r requirements-dev.txt
+python3 -m pip install -r requirements-dev.txt
 ```
 
+Alternatively, use Docker:
+```bash
+docker compose build web
+docker compose up
+```
 
+To enter the Docker container to run commands, use:
+```bash
+docker compose exec -it web bash
+```
 ## How to add host information from the JSON files?
 
 ```sh
