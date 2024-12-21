@@ -167,3 +167,6 @@ db.sqlite*
 redis
 certificates
 db*
+
+# Bundled assets
+/static/css
