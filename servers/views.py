@@ -114,7 +114,7 @@ def hosts(request):
 
 @login_required
 @permission_required("servers.view_host", raise_exception=True)
-def index2(request):
+def index(request):
     # osdetails: dict[Any, Any] = get_osdetails()
     # # HACK: To stop any error on the view for missing cache
     # if not osdetails:
@@ -137,4 +137,4 @@ def index2(request):
         osdetails = f"{ld.osname}-{ld.osrelease}"
         data[osdetails].append((host.hostname, host.id))
 
-    return render(request, "servers/index2.html", {"osdetails": dict(data)})
+    return render(request, "servers/index.html", {"title": "Servers", "osdetails": dict(data)})

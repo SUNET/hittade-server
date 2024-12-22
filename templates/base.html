@@ -7,7 +7,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="stylesheet" href="/static/css/main.css">
-        <title>{% block title %}Hittade Server{% endblock %}</title>
+        <title>{% if title %}{{ title }}{% else %}Hittade Server{% endif %}</title>
         {% block head %}{% endblock %}
     </head>
     <body>
@@ -23,7 +23,7 @@
                             <ul class="menu">
                                 <li><a class="link -home" href="/">Home</a></li>
                                 <li><a class="link -search" href="/search">Search</a></li>
-                                <li><a class="link -servers" href="/servers">Hosts</a></li>
+                                <li><a class="link -servers" href="/servers">Servers</a></li>
                                 <li><a class="link -containers" href="/containers">Containers</a></li>
                             </ul>
                         </nav>
@@ -35,6 +35,10 @@
                 </aside>
                 <main class="main">
                     {% block main %}
+                        <div class="ht-content">
+                            <h1 class="ht-heading -xl _mb">{{ title }}</h1>
+                            {% block content %}{% endblock %}
+                        </div>
                     {% endblock %}
                 </main>
             </div>
