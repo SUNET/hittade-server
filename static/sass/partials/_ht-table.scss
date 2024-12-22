@@ -1,0 +1,32 @@
+.ht-table {
+    margin: 20px 0;
+    border-radius: var(--ht-border-radius);
+    overflow: hidden;
+    border: 1px solid var(--ht-color--gray);
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    
+        :is(th, td) {
+            text-align: left;
+            padding: .75rem 1.5rem;
+        }
+    
+        th {
+            font-weight: 600;
+            background-color: var(--ht-color--gray);
+        }
+    
+        tr {
+            &:not(:last-child) {
+                border-bottom: 1px solid var(--ht-color--gray); 
+            }
+    
+            &:nth-child(even) {
+                background-color: var(--ht-color--gray-light); 
+            }
+        }
+    }
+    
+}
