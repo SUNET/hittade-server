@@ -9,7 +9,8 @@
     > .title {
         display: flex;
         align-items: center;
-        gap: .75rem;
+        gap: 1rem;
+        color: var(--ht-color--gray-dark);
     }
     
     > .title > .logo {
