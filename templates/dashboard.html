@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block body %}
+    <a href="#main-content" class="ht-skip-link">Skip to content</a>
+    <div class="ht-dashboard">
+        <aside class="sidebar" aria-label="Sidebar">
+            <header class="ht-dashboard-header" aria-label="Header menu">
+                <figure class="title" aria-label="Sunet">
+                    <img src="/static/img/sunet.svg" alt="Sunet" class="logo">
+                    <span class="ht-heading -l">Hittade</span>
+                </figure>
+                <nav class="navigation" aria-label="Main navigation">
+                    <ul class="menu" aria-label="Menu">
+                        <li><a class="link -home" href="/" aria-label="Go to the homepage">Home</a></li>
+                        <li><a class="link -search" href="/search" aria-label="Search the infrastructure">Search</a></li>
+                        <li><a class="link -servers" href="/servers" aria-label="View all servers">Servers</a></li>
+                        <li><a class="link -containers" href="/containers" aria-label="View all containers">Containers</a></li>
+                    </ul>
+                </nav>
+                <form class="logout" method="POST" action="{% url 'logout' %}" aria-label="Logout form">
+                    {% csrf_token %}
+                    <button type="submit" class="button" aria-label="Log out">Log out</button>
+                </form>
+            </header>
+        </aside>
+        <main id="main-content" class="main" aria-label="Main content">
+            {% block main %}
+                <div class="ht-content">
+                    <h1 class="ht-heading -xl _mb">{{ title }}</h1>
+                    {% block content %}{% endblock %}
+                </div>
+            {% endblock %}
+        </main>
+    </div>
+{% endblock %}
