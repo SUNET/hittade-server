@@ -1,0 +1,43 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="/static/css/main.css">
+        <title>{% block title %}Hittade Server{% endblock %}</title>
+        {% block head %}{% endblock %}
+    </head>
+    <body>
+        {% block body %}
+            <div class="ht-dashboard">
+                <aside class="sidebar">
+                    <header class="ht-dashboard-header">
+                        <figure class="title">
+                            <img src="/static/img/sunet.svg" alt="Sunet" class="logo">
+                            <span class="ht-heading -l">Hittade</span>
+                        </figure>
+                        <nav class="navigation" aria-label="Main navigation">
+                            <ul class="menu">
+                                <li><a class="link -home" href="/">Home</a></li>
+                                <li><a class="link -search" href="/search">Search</a></li>
+                                <li><a class="link -servers" href="/servers">Hosts</a></li>
+                                <li><a class="link -containers" href="/containers">Containers</a></li>
+                            </ul>
+                        </nav>
+                        <form class="logout" method="POST" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="button">Log out</button>
+                        </form>
+                    </header>
+                </aside>
+                <main class="main">
+                    {% block main %}
+                    {% endblock %}
+                </main>
+            </div>
+        {% endblock %}
+    </body>
+</html>
