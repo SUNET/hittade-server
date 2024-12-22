@@ -1,0 +1,23 @@
+.ht-content {
+    padding: 2rem 1rem;
+    min-height: 90svh;
+
+    &:is(.-center,.-middle) {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    &.-center {
+        align-items: center;
+    }
+
+    &.-middle {
+        justify-content: center;
+    }
+
+    &.-narrow {
+        margin: 0 auto;
+        width: min(100%, 40rem);
+    }
+}

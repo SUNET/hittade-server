@@ -1,0 +1,33 @@
+.ht-dashboard-header {
+    position: sticky;
+    top: 2rem;
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+
+    > .title {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+    }
+    
+    > .title > .logo {
+        width: 2.5rem;
+        height: auto;
+    }
+
+    > .navigation {}
+
+    > .navigation > .menu {}
+
+    > .navigation > .menu > * > .link {
+        font-size: var(--ht-font-size--m);
+        font-weight: 700;
+
+        &:not(:hover) {
+            text-decoration: none;
+        }
+    }
+}
+

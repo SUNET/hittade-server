@@ -1,0 +1,32 @@
+.ht-selector {
+    display: inline-flex;
+    border-radius: var(--ht-border-radius);
+    background-color: var(--ht-color--gray);
+
+    --ht-selector--checked--background: var(--ht-color--black);
+    --ht-selector--checked--text: var(--ht-color--white);
+    
+    &.-primary {
+        --ht-selector--checked--background: var(--ht-color--primary);
+        --ht-selector--checked--text: var(--ht-color--white);
+    }
+
+    & > .input {
+        display: none;
+    }
+
+    & > .label {
+        display: block;
+        padding: 14px 30px;
+        border-radius: var(--ht-border-radius);
+        cursor: pointer;
+        font-size: var(--ht-font-size);
+        font-weight: 600;
+        line-height: var(--ht-line-height);
+    }
+
+    & > .input:checked + .label {
+        background-color: var(--ht-selector--checked--background);
+        color: var(--ht-selector--checked--text);
+    }
+}

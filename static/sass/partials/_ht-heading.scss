@@ -1,0 +1,48 @@
+.ht-heading {
+  font-weight: 700;
+  font-family: var(--ht-font-family--highlight);
+}
+
+:is(.ht-text,.ht-heading) {
+  font-size: var(--ht-font-size);
+  line-height: var(--ht-line-height);
+
+  &.-xxl {
+    font-size: var(--ht-font-size--xxl);
+    line-height: var(--ht-line-height--xxl);
+  }
+  &.-xl {
+    font-size: var(--ht-font-size--xl);
+    line-height: var(--ht-line-height--xl);
+  }
+  &.-l {
+    font-size: var(--ht-font-size--l);
+    line-height: var(--ht-line-height--l);
+  }
+  &.-m {
+    font-size: var(--ht-font-size--m);
+    line-height: var(--ht-line-height--m);
+  }
+  &.-s {
+    font-size: var(--ht-font-size--s);
+  }
+  &.-xs {
+    font-size: var(--ht-font-size--xs);
+  }
+
+  &.-left {
+    text-align: left;
+  }
+  
+  &.-center {
+    text-align: center;
+  }
+
+  &.-right {
+    text-align: right;
+  }
+
+  &.-bold {
+    font-weight: 600;
+  }
+}

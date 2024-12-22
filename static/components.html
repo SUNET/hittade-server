@@ -1,0 +1,141 @@
+<!--! 
+    Temporarily list every UI components. 
+    It goes without saying this should of course be removed once we merge the new UI into main.
+-->
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="./css/main.css" />
+        <title>UI Components</title>
+        <style>
+            body > h1 {
+                font-size: 30px;
+                font-weight: bold;
+            }
+
+            body > section {
+                margin: 3rem 0 0;
+                padding: 0 0 3rem;
+                border-bottom: 1px solid black;
+            }
+
+            body > section > h2 {
+                margin-bottom: 1rem;
+                font-size: 25px;
+                font-weight: bold;
+            }
+
+            body > section > h3 {
+                margin-top: 1rem;
+                font-size: 18px;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Components</h1>
+
+        <section>
+            <h2>Heading sizes</h2>
+            <div>
+                <h1 class="ht-heading -xxl">Heading XXL</h1>
+                <h2 class="ht-heading -xl">Heading XL</h2>
+                <h3 class="ht-heading -l">Heading L</h3>
+                <h4 class="ht-heading -m">Heading M</h4>
+                <h4 class="ht-heading">Heading</h4>
+            </div>
+        </section>
+
+        <section>
+            <h2>Text sizes</h2>
+            <p class="ht-text"><strong>Regular:</strong> Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsum, non? Autem maiores at quae voluptatibus quidem exercitationem.</p>
+            <p class="ht-text -m"><strong>M:</strong> Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsum, non? Autem maiores at quae voluptatibus quidem exercitationem.</p>
+            <p class="ht-text -l"><strong>L:</strong> Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsum, non? Autem maiores at quae voluptatibus quidem exercitationem.</p>
+            <p class="ht-text -xl"><strong>XL:</strong> Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsum, non? Autem maiores at quae voluptatibus quidem exercitationem.</p>
+            <p class="ht-text -xxl"><strong>XXL:</strong> Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsum, non? Autem maiores at quae voluptatibus quidem exercitationem.</p>
+        </section>
+
+        <section>
+            <h2>Buttons</h2>
+            <h3>Normal</h3>
+            <div class="ht-buttons">
+                <a href="#" class="ht-button">default</a>
+                <a href="#" class="ht-button -primary">primary</a>
+                <a href="#" class="ht-button -success">success</a>
+                <a href="#" class="ht-button -info">info</a>
+                <a href="#" class="ht-button -warning">warning</a>
+                <a href="#" class="ht-button -danger">danger</a>
+                <a href="#" class="ht-button -gray">gray</a>
+                <a href="#" class="ht-button -gray-light">gray-light</a>
+                <a href="#" class="ht-button -white">white</a>
+                <a href="#" class="ht-button -black">black</a>
+            </div>
+            <h3>Outline</h3>
+            <div class="ht-buttons">
+                <a href="#" class="ht-button -outline">default</a>
+                <a href="#" class="ht-button -outline -primary">primary</a>
+                <a href="#" class="ht-button -outline -success">success</a>
+                <a href="#" class="ht-button -outline -info">info</a>
+                <a href="#" class="ht-button -outline -warning">warning</a>
+                <a href="#" class="ht-button -outline -danger">danger</a>
+                <a href="#" class="ht-button -outline -gray">gray</a>
+                <a href="#" class="ht-button -outline -gray-light">gray-light</a>
+                <a href="#" class="ht-button -outline -white">white</a>
+                <a href="#" class="ht-button -outline -black">black</a>
+            </div>
+        </section>
+        <section>
+            <h2>"Sliding" radio button</h2>
+            <div class="ht-buttons">
+                <div class="ht-selector">
+                    <input class="input" type="radio" name="options" id="option-1" value="option-1" checked />
+                    <label class="label" for="option-1">Option 1</label>
+                    <input class="input" type="radio" name="options" id="option-2" value="option-2" />
+                    <label class="label" for="option-2">Option two</label>
+                    <input class="input" type="radio" name="options" id="option-3" value="option-3" />
+                    <label class="label" for="option-3">Option three</label>
+                </div>
+                <div class="ht-selector -primary">
+                    <input class="input" type="radio" name="choices" id="choice-1" value="choice-1" checked />
+                    <label class="label" for="choice-1">Choice 1</label>
+                    <input class="input" type="radio" name="choices" id="choice-2" value="choice-2" />
+                    <label class="label" for="choice-2">Choice two</label>
+                    <input class="input" type="radio" name="choices" id="choice-3" value="choice-3" />
+                    <label class="label" for="choice-3">Choice three</label>
+                </div>
+            </div>
+        </section>
+        <section>
+            <h2>Notice</h2>
+            <div style="max-width: 700px;">
+                <div class="ht-notice">
+                    <h2 class="ht-heading">Default:</h2>
+                    <p class="ht-text -s">You found the button—just make sure it wasn’t <em>THE</em> button.</p>
+                </div>
+                <br>
+                <div class="ht-notice -success">
+                    <h2 class="ht-heading">Success:</h2>
+                    <p class="ht-text -s">Congratulations! You pressed the button—everything is working perfectly, and it’s all thanks to you!</p>
+                </div>
+                <br>
+                <div class="ht-notice -info">
+                    <h2 class="ht-heading">Info:</h2>
+                    <p class="ht-text -s">You pressed the button. Just letting you know in case you forgot or were wondering what happened.</p>
+                </div>
+                <br>
+                <div class="ht-notice -warning">
+                    <h2 class="ht-heading">Warning:</h2>
+                    <p class="ht-text -s">You pressed the button... are you sure that was a good idea? Things could get a little interesting.</p>
+                </div>
+                <br>
+                <div class="ht-notice -danger">
+                    <h2 class="ht-heading">Danger:</h2>
+                    <p class="ht-text -s">Uh-oh, you definitely pressed THE button... we hope you’ve got a good reason or at least a fire extinguisher handy.</p>
+                </div>
+            </div>
+        </section>
+    </body>
+</html>

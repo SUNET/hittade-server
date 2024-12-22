@@ -1,0 +1,17 @@
+.ht-dashboard {
+    display: flex;
+    gap: 2rem;
+
+    > .sidebar {
+        width: min(100%, 300px);
+    }
+
+    > .main {
+        min-height: calc(100svh - 2rem);
+        width: 100%;
+        padding: 1rem;
+        border-radius: var(--ht-border-radius);
+        background-color: var(--ht-color--white);
+        color: var(--ht-color--black);
+    }
+}
