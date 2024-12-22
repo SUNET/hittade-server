@@ -16,7 +16,15 @@ body {
     color: var(--ht-color--black);
 }
 
-/* Bold Text */
+a {
+    color: currentColor;
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
 strong, b {
     font-weight: bold;
 }
