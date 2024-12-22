@@ -38,7 +38,11 @@ def package(request, pk):
     return render(
         request,
         "servers/package.html",
-        {"package": package, "hosts": hosts_with_package},
+        {
+            "title": f"Package: {package.name} - {package.version}",
+            "package": package, 
+            "hosts": hosts_with_package
+        },
     )
 
 
@@ -55,6 +59,7 @@ def host(request, pk):
         request,
         "servers/host.html",
         {
+            "title": host.hostname,
             "host": host,
             "packages": host_packages.packages.all(),
             "containers": cdetails,
@@ -100,7 +105,14 @@ def search(request):
         form = SearchForm()
 
     return render(
-        request, "servers/search.html", {"form": form, "data": data, "text": text}
+        request, 
+        "servers/search.html", 
+        {
+            "title": "Search",
+            "form": form, 
+            "data": data, 
+            "text": text
+        }
     )
 
 
@@ -109,7 +121,7 @@ def search(request):
 def hosts(request):
     "To show list of all hosts."
     hosts = Host.objects.all().order_by("hostname")
-    return render(request, "servers/hosts.html", {"hosts": hosts})
+    return render(request, "servers/hosts.html", {"title": "All hosts", "hosts": hosts})
 
 
 @login_required

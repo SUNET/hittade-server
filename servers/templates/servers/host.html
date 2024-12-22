@@ -1,106 +1,101 @@
-{% extends "servers/base.html" %}
-{% block title %}Host details{% endblock %}
+{% extends "dashboard.html" %}
+
+{% block title %}
+    <a class="ht-text -m -bold" href="{% url 'servers:hosts' %}">Host</a>
+    {{ block.super }}
+{% endblock %}
 
 {% block content %}
-<div class="container-md m-5">
-    <p class="h2"> You are viewing details of
-        {{ host.hostname }}
+<div class="ht-container">
+    <p class="ht-text"> You are viewing details of
+        <strong>{{ host.hostname }}</strong>.
     </p>
 </div>
-<div class="container-md m-5">
-    <h3>OS details</h3>
-    <table class="table table-striped">
-        <tbody>
-            <tr>
-                <td>OS Name</td>
-                <td>{{ details.osname }}</td>
-            </tr>
-            <tr>
-                <td>OS Release</td>
-                <td>{{ details.osrelease }}</td>
-            </tr>
-            <tr>
-                <td>Domain</td>
-                <td>{{ details.domain }}</td>
-            </tr>
-            <tr>
-                <td>Fail2Ban</td>
-                <td>{% if details.fail2ban %} <span class="badge text-bg-success">On</span><span
-                        class="visually-hidden">On</span>
-                    {% else %} <span class="badge text-bg-warning">Off</span><span class="visually-hidden">Off</span>
-                    {% endif %}</td>
-            </tr>
-            <tr>
-                <td>IPv4</td>
-                <td>{{ details.ipv4 }}</td>
-            </tr>
-            <tr>
-                <td>IPv6</td>
-                <td>{{ details.ipv6 }}</td>
-            </tr>
-            <tr>
-                <td>Kernel version</td>
-                <td>{{ details.rkr }}</td>
-            </tr>
-
-
-        </tbody>
-    </table>
-
-</div>
-<div class="container-md m-5">
-    <div class="row">
-        <div class="col col-1">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 640 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
-                <path
-                    d="M349.9 236.3h-66.1v-59.4h66.1v59.4zm0-204.3h-66.1v60.7h66.1V32zm78.2 144.8H362v59.4h66.1v-59.4zm-156.3-72.1h-66.1v60.1h66.1v-60.1zm78.1 0h-66.1v60.1h66.1v-60.1zm276.8 100c-14.4-9.7-47.6-13.2-73.1-8.4-3.3-24-16.7-44.9-41.1-63.7l-14-9.3-9.3 14c-18.4 27.8-23.4 73.6-3.7 103.8-8.7 4.7-25.8 11.1-48.4 10.7H2.4c-8.7 50.8 5.8 116.8 44 162.1 37.1 43.9 92.7 66.2 165.4 66.2 157.4 0 273.9-72.5 328.4-204.2 21.4 .4 67.6 .1 91.3-45.2 1.5-2.5 6.6-13.2 8.5-17.1l-13.3-8.9zm-511.1-27.9h-66v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1v-59.4zm-78.1-72.1h-66.1v60.1h66.1v-60.1z" />
-            </svg>
-        </div>
-        <div class="col col-11">
-            <h3 class="md-2">Running containers: <span class="badge text-bg-info">{{ containers|length }}
-                </span></h3>
-        </div>
+<div class="ht-container">
+    <h3 class="ht-heading -m">OS details</h3>
+    <div class="ht-table -vertical-heads">
+        <table>
+            <tbody>
+                <tr>
+                    <th>OS Name</th>
+                    <td>{{ details.osname }}</td>
+                </tr>
+                <tr>
+                    <th>OS Release</th>
+                    <td>{{ details.osrelease }}</td>
+                </tr>
+                <tr>
+                    <th>Domain</th>
+                    <td>{{ details.domain }}</td>
+                </tr>
+                <tr>
+                    <th>Fail2Ban</th>
+                    <td>{% if details.fail2ban %} <span class="ht-badge -success">On</span>
+                        {% else %} <span class="ht-badge -warning">Off</span>
+                        {% endif %}</td>
+                </tr>
+                <tr>
+                    <th>IPv4</th>
+                    <td>{{ details.ipv4 }}</td>
+                </tr>
+                <tr>
+                    <th>IPv6</th>
+                    <td>{{ details.ipv6 }}</td>
+                </tr>
+                <tr>
+                    <th>Kernel version</th>
+                    <td>{{ details.rkr }}</td>
+                </tr>
+            </tbody>
+        </table> 
     </div>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th scope="col">Container Image</th>
-                <th scope="col">Image ID</th>
-                <th scope="col">Name</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for hc in containers %}
-            <tr>
-                <td>{{ hc.container.image }}</td>
-                <td>{{ hc.container.imageid }}</td>
-                <td>{{ hc.name }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-
 </div>
-<div class="container-md m-5">
-    <p class="h3">Current package list</p>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th scope="col">Package name</th>
-                <th scope="col">Package version</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for package in packages %}
-            <tr>
-                <td><a href="{% url 'servers:package' package.id %}">{{ package.name }}</a></td>
-                <td>{{ package.version }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="ht-container">
+   <div class="ht-flex">
+       <h3 class="ht-heading -m">Running containers: <span class="ht-badge -info">{{ containers|length }}</span></h3>
+       <img src="/static/icons/docker-brands-solid.svg" alt="Docker" width="40">
+   </div>
+    <div class="ht-table">
+        <table>
+            <thead>
+                <tr>
+                    <th scope="col">Container Image</th>
+                    <th scope="col">Image ID</th>
+                    <th scope="col">Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for hc in containers %}
+                <tr>
+                    <td>{{ hc.container.image }}</td>
+                    <td>{{ hc.container.imageid }}</td>
+                    <td>{{ hc.name }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="ht-container">
+    <h3 class="ht-heading -m">Current package list</h3>
+    <div class="ht-table">
+        <table>
+            <thead>
+                <tr>
+                    <th scope="col">Package name</th>
+                    <th scope="col">Package version</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for package in packages %}
+                <tr>
+                    <td><a href="{% url 'servers:package' package.id %}">{{ package.name }}</a></td>
+                    <td>{{ package.version }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 {% endblock %}

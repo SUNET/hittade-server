@@ -1,23 +1,24 @@
-{% extends "servers/base.html" %}
-{% block title %}Package details{% endblock %}
+{% extends "dashboard.html" %}
+{% block title %}
+    <p class="ht-text -m">Hosts with package: </p>
+    <h1 class="ht-heading -l _mb">{{ package.name }} - {{ package.version }}</h1>
+{% endblock %}
 
 {% block content %}
-<div class="container-md">
-    <h3 class="m-5">Hosts with package: {{ package.name }} - {{ package.version }}</h3>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th scope="col">Host name</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for host in hosts %}
-            <tr>
-                <td><a href="{% url 'servers:host' host.id %}">{{ host.hostname }} </a></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-
+    <div class="ht-table">
+        <table>
+            <thead>
+                <tr>
+                    <th scope="col">Host name</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for host in hosts %}
+                <tr>
+                    <td><a href="{% url 'servers:host' host.id %}">{{ host.hostname }} </a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}
