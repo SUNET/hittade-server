@@ -15,14 +15,11 @@ from .models import Host, HostContainers, HostDetails, HostPackages, Package
 from .utils import get_osdetails
 
 
-def index(request):
-    return render(request, "servers/index.html")
-
 
 def logout_view(request):
     # FIXME: Handle CSRF token validation
     logout(request)
-    return redirect(index)
+    return redirect("/")
 
 
 @login_required
