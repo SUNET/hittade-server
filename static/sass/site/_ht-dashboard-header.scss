@@ -63,5 +63,15 @@
             --icon-size: 100%;
         }
     }
+
+    > .navigation > .menu > * > .submenu {
+        padding-left: 2.15rem;
+    }
+
+    > .navigation > .menu > * > .submenu > * > .sublink {
+        margin-top: .75rem;
+        font-size: var(--ht-font-size);
+        font-weight: 700;
+    }
 }
 
