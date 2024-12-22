@@ -1,6 +1,7 @@
 .ht-dashboard-header {
     position: sticky;
     top: 2rem;
+    min-height: calc(100svh - 2rem);
     padding: 2rem 1rem;
     display: flex;
     flex-direction: column;
@@ -18,7 +19,9 @@
         height: auto;
     }
 
-    > .navigation {}
+    > .navigation {
+        flex-grow: 1;
+    }
 
     > .navigation > .menu {
         display: flex;
@@ -72,6 +75,43 @@
         margin-top: .75rem;
         font-size: var(--ht-font-size);
         font-weight: 700;
+    }
+    
+    > .logout {
+        padding-top: 1rem;
+        border-top: 1px solid var(--ht-color--gray-dark);
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    > .logout > .button {
+        padding: initial;
+        background: initial;
+        border: initial;
+        font-size: var(--ht-font-size);
+        font-weight: 600;
+        display: flex;
+        gap: .3rem;
+        align-items: center;
+
+        &:hover {
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        
+        &::after {
+            content: "";
+            display: block;
+            height: var(--ht-font-size);
+            width: var(--ht-font-size);
+            background-color: currentColor;
+            mask: {
+                image: url("/static/icons/right-from-bracket-solid.svg");
+                repeat: no-repeat;
+                size: 90%;
+                position: center center;
+            }
+        }
     }
 }
 
