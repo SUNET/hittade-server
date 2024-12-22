@@ -4,20 +4,23 @@
     overflow: hidden;
     border: 1px solid var(--ht-color--gray);
 
+    &.-vertical-heads {
+        table th {
+            width: 20%;
+            white-space: nowrap;
+        }
+    }
+
     table {
         width: 100%;
         border-collapse: collapse;
+        table-layout:fixed;
     
         :is(th, td) {
             text-align: left;
             padding: .75rem 1.5rem;
         }
-    
-        th {
-            font-weight: 600;
-            background-color: var(--ht-color--gray);
-        }
-    
+
         tr {
             &:not(:last-child) {
                 border-bottom: 1px solid var(--ht-color--gray); 
@@ -26,6 +29,25 @@
             &:nth-child(even) {
                 background-color: var(--ht-color--gray-light); 
             }
+        }
+    
+        th {
+            font-weight: 600;
+            background-color: var(--ht-color--gray);
+
+            &:not(:last-child) {
+                border-bottom: 1px solid var(--ht-color--gray-light); 
+            }
+        }
+
+        td { 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            word-wrap: break-word;
+        }
+
+        a {
+            text-decoration: underline;
         }
     }
     
