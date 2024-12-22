@@ -1,6 +1,10 @@
 .ht-content {
-    padding: 2rem 1rem;
+    padding: 4.6875rem;
     min-height: 90svh;
+
+    @media (max-width: 900px) {
+        padding: 4.6875rem 1rem;
+    }
 
     &:is(.-center,.-middle) {
         display: flex;
@@ -16,7 +20,7 @@
         justify-content: center;
     }
 
-    &.-narrow {
+    &.-narrow > * {
         margin: 0 auto;
         width: min(100%, 40rem);
     }

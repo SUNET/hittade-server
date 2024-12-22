@@ -3,6 +3,10 @@
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
+
+    &.-center {
+        justify-content: center;
+    }
 }
 
 .ht-button {
