@@ -1,0 +1,20 @@
+{% extends "dashboard.html" %}
+
+{% block subtitle %}
+    <p>Welcome to server/host details page</p>
+{% endblock %}
+
+{% block content %}
+    {% for osd, values in osdetails.items %}
+    <details>
+        <summary class="ht-heading -m">{{ osd }}</summary>
+        <div>
+            <ul>
+                {% for value in values %}
+                    <li class="ht-text"><a href="{% url 'servers:host' value.1 %}"> {{ value.0 }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </details>
+    {% endfor %}
+{% endblock %}
