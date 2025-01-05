@@ -14,7 +14,7 @@ from .utils import latest_containers
 @login_required
 @permission_required("containers.view_containerbase", raise_exception=True)
 def index(request):
-    return render(request, "containers/search.html")
+    return render(request, "containers/search.html", {"title": f"Search for container"})
 
 
 def package(request, pk):
@@ -34,7 +34,11 @@ def package(request, pk):
     return render(
         request,
         "containers/package.html",
-        {"package": package, "data": result},
+        {
+            "title": f"Package details",
+            "package": package, 
+            "data": result,
+        },
     ) 
 
 
@@ -46,7 +50,17 @@ def cbase(request, cid):
         cb = ContainerBase.objects.filter(cid=cid)[0]
     except ContainerBase.DoesNotExist:
         return render(request, "containers/container.html", {"error": "Container not found."})
-    return render(request, "containers/container.html", {"cb": cb, "tags": cb.tags.all(), "packages": cb.packages.all()})
+    
+    return render(
+        request, 
+        "containers/container.html", 
+        {
+            "title": f"Container details",
+            "cb": cb, 
+            "tags": cb.tags.all(), 
+            "packages": cb.packages.all(),
+        }
+    )
 
 @login_required
 @permission_required("containers.view_containerbase", raise_exception=True)
@@ -65,7 +79,16 @@ def containers(request):
     result = []
     for cb in page.object_list:
         result.append({"fullname": cb.tags.all()[0].fullname, "cid": cb.cid})
-    return render(request, "containers/containers.html", {"cbs": result, "page": page})
+    
+    return render(
+        request, 
+        "containers/containers.html", 
+        {
+            "title": f"All container images",
+            "cbs": result, 
+            "page": page,
+        }
+    )
 
 
 @login_required
@@ -116,5 +139,12 @@ def search(request):
         form = SearchForm()
 
     return render(
-        request, "containers/search.html", {"form": form, "data": data, "text": text}
+        request, 
+        "containers/search.html", 
+        {
+            "title": f"Search for container",
+            "form": form, 
+            "data": data, 
+            "text": text,
+        }
     )
