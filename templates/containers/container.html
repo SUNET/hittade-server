@@ -18,25 +18,25 @@
         </div>
         <div class="ht-container">
             <h3 class="ht-heading -m">OS details</h3>
-            <div class="ht-table">
+            <div class="ht-table -vertical-heads">
                 <table>
                     <tbody>
                         <tr>
-                            <td>OS Name</td>
+                            <th>OS Name</th>
                             <td>{{ cb.osname }}</td>
                         </tr>
                         <tr>
-                            <td>OS Version</td>
+                            <th>OS Version</th>
                             <td>{{ cb.osversionid }}</td>
                         </tr>
                         <tr>
-                            <td>SHA256</td>
+                            <th>SHA256</th>
                             <td>
                                 {{ cb.cid }}
                             </td>
                         </tr>
                         <tr>
-                            <td>Created At</td>
+                            <th>Created At</th>
                             <td>
                                 {{ cb.ctime|date:"r" }}
                             </td>
