@@ -1,0 +1,59 @@
+{% extends "dashboard.html" %}
+
+{% block content %}
+    <div class="ht-container -narrow">
+        <form action="{% url 'containers:search' %}" method="post">
+            {% csrf_token %}
+            <div class="ht-search-bar">
+                <input type="text" class="text" id="id_serach" name="search" placeholder="Search" value="{{ text }}">
+                <select class="category" aria-label="Choose to search for package or container" name="stype" id="stype">
+                    <option value="container" {% if stype == "container" %}selected{% endif %}>Container</option>
+                    <option value="package" {% if stype == "package" %}selected{% endif %}>Package</option>
+                </select>
+            </div>
+        </form>
+    </div>
+    <div class="ht-container">
+        {% if data.packages %}
+        <div class="ht-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Version</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for package in data.packages %}
+                    <tr>
+                        <td><a href="{% url 'containers:package' package.id %}">{{ package.name }} </a></td>
+                        <td>{{ package.version }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% elif data.cbs %}
+        <div class="ht-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">Host name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cb in data.cbs %}
+                    <tr>
+                        <td> <a href="{% url 'containers:cbase' cb.cid %}">{{ cb.fullname }}</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% elif text %}
+            <p class="ht-text">
+                No {{ stype }} with name "{{ text }}" was found.
+            </p>
+        {% endif %}
+    </div>
+{% endblock %}

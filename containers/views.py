@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import OuterRef, Subquery
@@ -14,7 +14,7 @@ from .utils import latest_containers
 @login_required
 @permission_required("containers.view_containerbase", raise_exception=True)
 def index(request):
-    return render(request, "containers/search.html", {"title": f"Search for container"})
+    return redirect(search)
 
 
 def package(request, pk):
@@ -97,6 +97,7 @@ def search(request):
     # if this is a POST request we need to process the form data
     data = {}
     text = ""
+    stype = ""
     if request.method == "POST":
         # create a form instance and populate it with data from the request:
         form = SearchForm(request.POST)
@@ -106,6 +107,7 @@ def search(request):
             # ...
             # redirect to a new URL:
             text = form.data["search"]
+            stype = form.data["stype"]
             if form.data["stype"] == "package":
                 search_text = form.data["search"]
                 words = search_text.split(" ")
@@ -142,9 +144,10 @@ def search(request):
         request, 
         "containers/search.html", 
         {
-            "title": f"Search for container",
+            "title": f"Container search",
             "form": form, 
             "data": data, 
             "text": text,
+            "stype": stype,
         }
     )
