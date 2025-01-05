@@ -19,12 +19,15 @@
             </table>
         </div>
         {% if page.has_other_pages %}
-            {% if page.has_previous %}
-                <a href="{% url 'containers:containers' %}?page={{page.previous_page_number}}">Prev</a> &nbsp;&nbsp;&nbsp;
-            {% endif %}
-            {% if page.has_next %}
-                <a href="{% url 'containers:containers' %}?page={{page.next_page_number}}">Next</a>
-            {% endif %}
+            <div class="ht-pagination">
+                {% if page.has_previous %}
+                    <a class="prev" href="{% url 'containers:containers' %}?page={{page.previous_page_number}}">Prev</a>
+                {% endif %}
+                <span>{{ page }}</span>
+                {% if page.has_next %}
+                    <a class="next" href="{% url 'containers:containers' %}?page={{page.next_page_number}}">Next</a>
+                {% endif %}
+            </div>
         {% endif %}
     </div>
 {% endblock %}

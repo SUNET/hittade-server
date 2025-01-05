@@ -1,0 +1,38 @@
+.ht-pagination {
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    font-family: var(--ht-font-family--highlight);
+
+    > :is(.prev,.next) {
+        display: flex;
+        align-items: center;
+        gap: .25rem;
+        font-weight: 700;
+    }
+
+    > .prev::before,
+    > .next::after {
+        content: "";
+        width: 1.25rem;
+        height: 1.25rem;
+        display: inline-block;
+        vertical-align: middle;
+        background-color: currentColor;
+        mask: {
+            image: url('/static/icons/chevron-down-solid.svg');
+            repeat: no-repeat;
+            size: 90%;
+            position: center center;
+        }
+    }
+
+    > .prev::before {
+       transform: rotate(90deg);
+    }
+
+    > .next::after {
+       transform: rotate(-90deg);
+    }
+}
