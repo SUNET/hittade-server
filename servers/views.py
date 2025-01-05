@@ -74,6 +74,8 @@ def search(request):
     # if this is a POST request we need to process the form data
     data = {}
     text = ""
+    stype = ""
+
     if request.method == "POST":
         # create a form instance and populate it with data from the request:
         form = SearchForm(request.POST)
@@ -83,6 +85,7 @@ def search(request):
             # ...
             # redirect to a new URL:
             text = form.data["search"]
+            stype = form.data["stype"]
             if form.data["stype"] == "package":
                 search_text = form.data["search"]
                 words = search_text.split(" ")
@@ -111,7 +114,8 @@ def search(request):
             "title": "Search",
             "form": form, 
             "data": data, 
-            "text": text
+            "text": text,
+            "stype": stype,
         }
     )
 

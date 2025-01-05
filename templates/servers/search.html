@@ -1,26 +1,18 @@
 {% extends "dashboard.html" %}
 
 {% block content %}
-    <header class="m-5">
+    <div class="ht-container -narrow">
         <form action="{% url 'servers:search' %}" method="post">
             {% csrf_token %}
-            <div class="col-6 offset-3">
-                <div class="input-group input-group-lg">
-                    <span class="input-group-text rounded-start-5">
-                        <i class="fas fa-search"></i>
-                    </span>
-                    <input type="text" class="form-control" id="id_serach" name="search">
-                    <div class="col-xs-1">
-                        <select class="form-select form-select-lg rounded-end-5" aria-label="Searching for package or host"
-                            name="stype" id="stype">
-                            <option value="package">Package</option>
-                            <option value="host">Host</option>
-                        </select>
-                    </div>
-                </div>
+            <div class="ht-search-bar">
+                <input type="text" class="text" id="id_serach" name="search" placeholder="Search" value="{{ text }}">
+                <select class="category" aria-label="Choose to search for package or host" name="stype" id="stype">
+                    <option value="package" {% if stype == "package" %}selected{% endif %}>Package</option>
+                    <option value="host" {% if stype == "host" %}selected{% endif %}>Host</option>
+                </select>
             </div>
         </form>
-    </header>
+    </div>
     <div class="ht-container">
         {% if data.packages %}
         <div class="ht-table">
@@ -41,9 +33,7 @@
                 </tbody>
             </table>
         </div>
-        {% endif %}
-
-        {% if data.hosts %}
+        {% elif data.hosts %}
         <div class="ht-table">
             <table>
                 <thead>
@@ -60,6 +50,10 @@
                 </tbody>
             </table>
         </div>
+        {% elif text %}
+            <p class="ht-text">
+                No {{ stype }} with name "{{ text }}" was found.
+            </p>
         {% endif %}
     </div>
 

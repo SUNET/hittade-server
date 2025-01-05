@@ -1,0 +1,56 @@
+.ht-search-bar {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto max-content;
+    background-color: var(--ht-color--gray);
+    border-radius: var(--ht-border-radius);
+    font-family: var(--ht-font-family--highlight);
+
+    &::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 30px;
+        transform: translate(-50%, -50%);
+        width: 1.25rem;
+        height: 1.25rem;
+        background-color: currentColor;
+        mask: {
+            image: url('/static/icons/magnifying-glass-solid.svg');
+            repeat: no-repeat;
+            size: contain;
+            position: center center;
+        }
+    }
+
+    > * {
+        width: 100%;
+    }
+
+    > .text {
+        padding: 14px 15px 14px 60px;
+        border: initial;
+        background-color: initial;
+        font-size: var(--ht-font-size);
+        
+    }
+
+    > .category {
+        position: relative;
+        -moz-appearance:none;
+        -webkit-appearance:none;
+        appearance:none;
+        padding: 14px 40px 14px 15px;
+        border: initial;
+        background-color: initial;
+        font-size: var(--ht-font-size--s);
+        font-weight: 600;
+        background: {
+            image: url('/static/icons/chevron-down-solid.svg');
+            repeat: no-repeat;
+            position-x: 87.5%;
+            position-y: 50%;
+            size: 1rem 1rem;
+        }
+    }
+}
