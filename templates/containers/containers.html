@@ -21,11 +21,15 @@
         {% if page.has_other_pages %}
             <div class="ht-pagination">
                 {% if page.has_previous %}
-                    <a class="prev" href="{% url 'containers:containers' %}?page={{page.previous_page_number}}">Prev</a>
+                    <a class="nav -prev" href="{% url 'containers:containers' %}?page={{page.previous_page_number}}" aria-label="Go to the previous page of containers">Prev</a>
+                {% else %}
+                    <span class="nav -prev -disabled">Prev</span>
                 {% endif %}
                 <span>{{ page }}</span>
                 {% if page.has_next %}
-                    <a class="next" href="{% url 'containers:containers' %}?page={{page.next_page_number}}">Next</a>
+                    <a class="nav -next" href="{% url 'containers:containers' %}?page={{page.next_page_number}}" aria-label="Go to the next page to see more containers">Next</a>
+                {% else %}
+                    <span class="nav -next -disabled">Next</span>
                 {% endif %}
             </div>
         {% endif %}
