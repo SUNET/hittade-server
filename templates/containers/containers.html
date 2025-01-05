@@ -1,0 +1,30 @@
+{% extends "dashboard.html" %}
+
+{% block content %}
+    <div class="ht-container">
+        <div class="ht-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">Container</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cb in cbs %}
+                    <tr>
+                        <td> <a href="{% url 'containers:cbase' cb.cid %}">{{ cb.fullname }}</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if page.has_other_pages %}
+            {% if page.has_previous %}
+                <a href="{% url 'containers:containers' %}?page={{page.previous_page_number}}">Prev</a> &nbsp;&nbsp;&nbsp;
+            {% endif %}
+            {% if page.has_next %}
+                <a href="{% url 'containers:containers' %}?page={{page.next_page_number}}">Next</a>
+            {% endif %}
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "dashboard.html" %}
+
+{% block content %}
+    {% if error %}
+        <div class="ht-container">
+            <div class="ht-notice -danger" role="alert">
+                {{ error }}
+            </div>
+        </div>
+    {% else %}
+        <div class="ht-container">
+            <p class="ht-text -xl"> You are viewing details of the image with existing tag(s):</p>
+            {% for tag in tags %}
+                <p class="ht-text -l">{{ tag.fullname }}</p>
+            {% endfor %}
+        </div>
+        <div class="ht-container">
+            <h3 class="ht-heading -l">OS details</h3>
+            <div class="ht-table">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>OS Name</td>
+                            <td>{{ cb.osname }}</td>
+                        </tr>
+                        <tr>
+                            <td>OS Version</td>
+                            <td>{{ cb.osversionid }}</td>
+                        </tr>
+                        <tr>
+                            <td>SHA256</td>
+                            <td>
+                                {{ cb.cid }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Created At</td>
+                            <td>
+                                {{ cb.ctime|date:"r" }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        <div class="ht-container">
+            <p class="ht-heading -l">Package list</p>
+            <div class="ht-table">
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Package name</th>
+                            <th scope="col">Package version</th>
+                            <th scope="col">Provider</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for package in packages %}
+                        <tr>
+                            <td><a href="{% url 'containers:package' package.id %}">{{ package.name }}</a></td>
+                            <td>{{ package.version }}</td>
+                            <td>{{ package.provider }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
