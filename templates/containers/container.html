@@ -9,10 +9,12 @@
         </div>
     {% else %}
         <div class="ht-container">
-            <p class="ht-text -xl"> You are viewing details of the image with existing tag(s):</p>
-            {% for tag in tags %}
-                <p class="ht-text -l">{{ tag.fullname }}</p>
-            {% endfor %}
+            <p class="ht-text"> You are viewing details of the image with existing tag(s):</p>
+            <ul class="ht-unordered-list">
+                {% for tag in tags %}
+                    <li class="ht-text">{{ tag.fullname }}</li>
+                {% endfor %}
+            </ul>
         </div>
         <div class="ht-container">
             <h3 class="ht-heading -l">OS details</h3>
