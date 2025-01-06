@@ -43,9 +43,11 @@
         <main id="main-content" class="main" aria-label="Main content">
             {% block main %}
                 <div class="ht-content">
-                    {% block title %}
-                        <h1 class="ht-heading -xl _mb">{{ title }}</h1>
-                    {% endblock %}
+                    <div class="ht-container">
+                        {% block title %}
+                            <h1 class="ht-heading -xl _mb">{{ title }}</h1>
+                        {% endblock %}
+                    </div>
                     {% block content %}{% endblock %}
                 </div>
             {% endblock %}

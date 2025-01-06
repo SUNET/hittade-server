@@ -3,14 +3,12 @@
 {% block title %}
     <a class="ht-text -m -bold" href="{% url 'servers:hosts' %}">Host</a>
     {{ block.super }}
-{% endblock %}
-
-{% block content %}
-<div class="ht-container">
     <p class="ht-text"> You are viewing details of
         <strong>{{ host.hostname }}</strong>.
     </p>
-</div>
+{% endblock %}
+
+{% block content %}
 <div class="ht-container">
     <h3 class="ht-heading -m">OS details</h3>
     <div class="ht-scrollable">
