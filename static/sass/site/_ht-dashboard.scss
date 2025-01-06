@@ -1,16 +1,21 @@
 .ht-dashboard {
-    display: grid;
-    gap: 2rem;
-    grid-template-columns: 300px auto;
+    
+
+    @media (min-width: 1025px) {
+        display: grid;
+        gap: 2rem;
+        grid-template-columns: 300px auto;
+        grid-template-areas: 'sidebar main';
+    }
 
     > .sidebar {
-        grid-column: 1;
+        grid-area: sidebar;
     }
 
     > .main {
-        grid-column: 2;
-        min-height: calc(100svh - 2rem);
+        grid-area: main;
         padding: 1rem;
+        min-height: calc(100svh - 2rem);
         border-radius: var(--ht-border-radius);
         background-color: var(--ht-color--white);
         color: var(--ht-color--black);

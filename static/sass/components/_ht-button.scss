@@ -13,6 +13,7 @@
 
     &:not(.-outline) {
         box-shadow: var(--ht-box-shadow);
+        border: initial;
     }
 
     /* Types */

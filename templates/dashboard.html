@@ -1,14 +1,20 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block head %}
+    <script defer src="{% static 'js/dashboard-header.js' %}"></script>
+{% endblock %}
 
 {% block body %}
     <a href="#main-content" class="ht-skip-link">Skip to content</a>
     <div class="ht-dashboard">
         <aside class="sidebar" aria-label="Sidebar">
-            <header class="ht-dashboard-header" aria-label="Header menu">
+            <header id="dashboard-header" class="ht-dashboard-header" aria-label="Header menu">
                 <figure class="title" aria-label="Sunet">
                     <img src="/static/img/sunet.svg" alt="Sunet" class="logo">
                     <span class="ht-heading -l">Hittade</span>
                 </figure>
+                <button id="dashboard-header-hamburger" class="hamburger ht-button -gray" aria-expanded="false" aria-controls="dashboard-header">Menu</button>
                 <nav class="navigation" aria-label="Main navigation">
                     <ul class="menu" aria-label="Menu">
                         <li><a class="link -home" href="/" aria-label="Go to the homepage">Home</a></li>
