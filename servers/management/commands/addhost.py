@@ -1,17 +1,20 @@
+import datetime
+import pathlib
+
+import orjson
+import pytz
 from django.core.management.base import BaseCommand
+from django.utils.dateparse import parse_datetime
 from servers.models import (
+    ContainerImage,
     Host,
-    Package,
+    HostContainers,
+    HostContainersThrough,
     HostDetails,
     HostPackages,
-    HostContainers,
-    ContainerImage,
-    HostContainersThrough,
+    Package,
 )
 from servers.utils import update_latest_hosts
-from django.utils.dateparse import parse_datetime
-import orjson
-import pathlib
 
 # DB cache for runtime
 PACKAGES = {}
@@ -72,9 +75,14 @@ class Command(BaseCommand):
                 values = data["values"]
             else:
                 values = data
-            # FIXME: The timestamp is still missing in many files.
-            created_str = data["timestamp"]
-            created_at = parse_datetime(created_str)
+            # FIXME: The timestamp is still missing in many files, generated on Debian 12.
+            try:
+                created_str = data["timestamp"]
+                created_at = parse_datetime(created_str)
+            except:
+                created_at = datetime.datetime.now(datetime.timezone.utc).replace(
+                    tzinfo=pytz.utc
+                )
             system_packages = values["packages"][0]
             domain = values.get("domain", None)
             osname = values["os"]["name"]
