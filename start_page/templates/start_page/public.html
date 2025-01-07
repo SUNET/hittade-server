@@ -5,7 +5,11 @@
         <figure class="ht-flex -center">
             <img src="/static/img/sunet.svg" width="130" alt="Sunet">
         </figure>
-        {% include "start_page/_shared.html" %}
+        <h1 class="ht-heading -xxl -center">Hittade server</h1>
+        <div class="ht-notice -info" aria-labelledby="access-note-heading">
+            <h2 id="access-note-heading" class="ht-heading">Note:</h2>
+            <p class="ht-text -s">After you login for the first time, you will have to inform Kushal (for the test server) to give you access.</p>
+        </div>
         <div class="ht-buttons -center">
             <a href="{% url 'login' %}" class="ht-button -primary">Log in</a>
         </div>
