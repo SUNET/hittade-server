@@ -1,0 +1,54 @@
+@use "sass:map";
+@use '../mixins/colors';
+
+.ht-notice {
+    position: relative;
+    padding: .75rem 1.5rem .75rem 4rem;
+    container-type: normal;
+    container-name: notice;
+    border-radius: var(--ht-border-radius);
+    font-weight: 600;
+    background-color: var(--ht-notice--background, var(--ht-color--black));
+    color: var(--ht-notice--text, var(--ht-color--white));
+    box-shadow: var(--ht-box-shadow);
+
+    &::before {
+        content: "";
+        position: absolute;
+        top: min(50%, 2.5rem);
+        left: 0;
+        transform: translate(50%, -50%);
+        width: auto;
+        height: min(53%, 2rem);
+        aspect-ratio: 1/1;
+        background-color: currentColor;
+        opacity: .75;
+        mask: {
+            image: var(--ht-notice--icon, url('/static/icons/circle-info-solid.svg'));
+            repeat: no-repeat;
+            size: contain;
+        };
+
+        
+    }
+
+    @each $key, $color in colors.$colors {
+        $icon: '';
+
+        @if $key == 'success' {
+            $icon: 'circle-check-solid';
+        } @else if $key == 'info' {
+            $icon: 'circle-info-solid';
+        } @else if $key == 'warning' {
+            $icon: 'circle-exclamation-solid';
+        } @else if $key == 'danger' {
+            $icon: 'triangle-exclamation-solid';
+        }
+
+        &.-#{$key} {
+            --ht-notice--background: #{map.get($color, variable)};
+            --ht-notice--text: #{map.get($color, text-color)};
+            --ht-notice--icon: url('/static/icons/#{$icon}.svg');
+        }
+    }
+}   

@@ -1,0 +1,11 @@
+.ht-container {
+    margin: 2rem 0;
+
+    &.-center > * {
+        margin: 0 auto;
+    }
+
+    &.-narrow > * {
+        width: min(100%, 40rem);
+    }
+}

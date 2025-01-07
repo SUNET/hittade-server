@@ -1,0 +1,144 @@
+.ht-dashboard-header {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    font-family: var(--ht-font-family--highlight);
+
+    @media (max-width: 1024px) {
+        padding: .25rem 1rem 2rem;
+
+        &:not(.-open) {
+            > :is(.navigation, .logout) {
+                display: none;
+            }
+        }
+    }
+
+    @media (min-width: 1025px) {
+        position: sticky;
+        top: 2rem;
+        padding: 2rem 1rem;
+        min-height: calc(100svh - 2rem);
+    }
+
+    > .title {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: var(--ht-color--gray-dark);
+    }
+    
+    > .title > .logo {
+        width: 2.5rem;
+        height: auto;
+    }
+    
+    > .hamburger {
+        position: absolute;
+        top: .25rem;
+        right: 1rem;
+        font-size: var(--ht-font-size--s);
+        cursor: pointer;
+
+        @media (min-width: 1025px) {
+            display: none;
+        }
+    }
+
+    > .navigation {
+        flex-grow: 1;
+    }
+
+    > .navigation > .menu {
+        display: flex;
+        flex-direction: column;
+        gap: .5rem;
+    }
+
+    > .navigation > .menu > * > .link {
+        font-size: var(--ht-font-size--m);
+        font-weight: 700;
+        display: flex;
+        gap: .6rem;
+        align-items: center;
+
+        &::before {
+            content: "";
+            width: 1.5rem;
+            height: 1.5rem;
+            background-color: currentColor;
+            mask: {
+                image: var(--icon-url);
+                repeat: no-repeat;
+                size: var(--icon-size, 100%);
+                position: center center;
+            }
+        }
+
+        &.-home {
+            --icon-url: url("/static/icons/house-solid.svg");
+            --icon-size: 90%;
+        }
+        &.-search {
+            --icon-url: url("/static/icons/magnifying-glass-solid.svg");
+            --icon-size: 90%;
+        }
+        &.-servers {
+            --icon-url: url("/static/icons/server-solid.svg");
+            --icon-size: 90%;
+        }
+        &.-containers {
+            --icon-url: url("/static/icons/docker-brands-solid.svg");
+            --icon-size: 100%;
+        }
+    }
+
+    > .navigation > .menu > * > .submenu {
+        padding-left: 2.15rem;
+    }
+
+    > .navigation > .menu > * > .submenu > * > .sublink {
+        margin-top: .75rem;
+        font-size: var(--ht-font-size);
+        font-weight: 700;
+    }
+    
+    > .logout {
+        padding-top: 1rem;
+        border-top: 1px solid var(--ht-color--gray-dark);
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    > .logout > .button {
+        padding: initial;
+        background: initial;
+        border: initial;
+        font-size: var(--ht-font-size);
+        font-weight: 600;
+        display: flex;
+        gap: .3rem;
+        align-items: center;
+
+        &:hover {
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        
+        &::after {
+            content: "";
+            display: block;
+            height: var(--ht-font-size);
+            width: var(--ht-font-size);
+            background-color: currentColor;
+            mask: {
+                image: url("/static/icons/right-from-bracket-solid.svg");
+                repeat: no-repeat;
+                size: 90%;
+                position: center center;
+            }
+        }
+    }
+}
+

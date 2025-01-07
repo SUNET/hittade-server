@@ -1,0 +1,34 @@
+@use 'sass:map';
+@use '../mixins/colors';
+
+.ht-button {
+    padding: 14px 30px;
+    border-radius: var(--ht-border-radius);
+    font-size: var(--ht-font-size);
+    line-height: var(--ht-line-height);
+    text-decoration: none;
+    font-weight: 600;
+    background-color: var(--ht-button--background, var(--ht-color--black));
+    color: var(--ht-button--color, var(--ht-color--white));
+
+    &:not(.-outline) {
+        box-shadow: var(--ht-box-shadow);
+        border: initial;
+    }
+
+    /* Types */
+    &.-outline {
+        background-color: transparent;
+        color: var(--ht-button--background, currentColor);
+        border: 2px solid currentColor;
+    }
+
+    @each $key, $color in colors.$colors {
+        &.-#{$key} {
+            --ht-button--background: #{map.get($color, variable)};
+            --ht-button--color: #{map.get($color, text-color)};
+        }
+    }
+}
+
+

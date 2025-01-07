@@ -15,14 +15,11 @@ from .models import Host, HostContainers, HostDetails, HostPackages, Package
 from .utils import get_osdetails
 
 
-def index(request):
-    return render(request, "servers/index.html")
-
 
 def logout_view(request):
     # FIXME: Handle CSRF token validation
     logout(request)
-    return redirect(index)
+    return redirect("/")
 
 
 @login_required
@@ -41,7 +38,11 @@ def package(request, pk):
     return render(
         request,
         "servers/package.html",
-        {"package": package, "hosts": hosts_with_package},
+        {
+            "title": f"Package: {package.name} - {package.version}",
+            "package": package, 
+            "hosts": hosts_with_package
+        },
     )
 
 
@@ -58,6 +59,7 @@ def host(request, pk):
         request,
         "servers/host.html",
         {
+            "title": host.hostname,
             "host": host,
             "packages": host_packages.packages.all(),
             "containers": cdetails,
@@ -72,6 +74,8 @@ def search(request):
     # if this is a POST request we need to process the form data
     data = {}
     text = ""
+    stype = ""
+
     if request.method == "POST":
         # create a form instance and populate it with data from the request:
         form = SearchForm(request.POST)
@@ -81,6 +85,7 @@ def search(request):
             # ...
             # redirect to a new URL:
             text = form.data["search"]
+            stype = form.data["stype"]
             if form.data["stype"] == "package":
                 search_text = form.data["search"]
                 words = search_text.split(" ")
@@ -103,7 +108,15 @@ def search(request):
         form = SearchForm()
 
     return render(
-        request, "servers/search.html", {"form": form, "data": data, "text": text}
+        request, 
+        "servers/search.html", 
+        {
+            "title": "Search",
+            "form": form, 
+            "data": data, 
+            "text": text,
+            "stype": stype,
+        }
     )
 
 
@@ -112,12 +125,12 @@ def search(request):
 def hosts(request):
     "To show list of all hosts."
     hosts = Host.objects.all().order_by("hostname")
-    return render(request, "servers/hosts.html", {"hosts": hosts})
+    return render(request, "servers/hosts.html", {"title": "All hosts", "hosts": hosts})
 
 
 @login_required
 @permission_required("servers.view_host", raise_exception=True)
-def index2(request):
+def index(request):
     # osdetails: dict[Any, Any] = get_osdetails()
     # # HACK: To stop any error on the view for missing cache
     # if not osdetails:
@@ -140,4 +153,4 @@ def index2(request):
         osdetails = f"{ld.osname}-{ld.osrelease}"
         data[osdetails].append((host.hostname, host.id))
 
-    return render(request, "servers/index2.html", {"osdetails": dict(data)})
+    return render(request, "servers/index.html", {"title": "Servers", "osdetails": dict(data)})

@@ -1,0 +1,73 @@
+{% extends "dashboard.html" %}
+
+{% block content %}
+    {% if error %}
+        <div class="ht-container">
+            <div class="ht-notice -danger" role="alert">
+                {{ error }}
+            </div>
+        </div>
+    {% else %}
+        <div class="ht-container">
+            <p class="ht-text"> You are viewing details of the image with existing tag(s):</p>
+            <ul class="ht-unordered-list">
+                {% for tag in tags %}
+                    <li>{{ tag.fullname }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="ht-container">
+            <h3 class="ht-heading -m">OS details</h3>
+            <div class="ht-scrollable">
+                <table class="ht-table -vertical-heads">
+                    <tbody>
+                        <tr>
+                            <th>OS Name</th>
+                            <td>{{ cb.osname }}</td>
+                        </tr>
+                        <tr>
+                            <th>OS Version</th>
+                            <td>{{ cb.osversionid }}</td>
+                        </tr>
+                        <tr>
+                            <th>SHA256</th>
+                            <td>
+                                {{ cb.cid }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Created At</th>
+                            <td>
+                                {{ cb.ctime|date:"r" }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        <div class="ht-container">
+            <p class="ht-heading -m">Package list</p>
+            <div class="ht-scrollable">
+                <table class="ht-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Package name</th>
+                            <th scope="col">Package version</th>
+                            <th scope="col">Provider</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for package in packages %}
+                        <tr>
+                            <td><a href="{% url 'containers:package' package.id %}">{{ package.name }}</a></td>
+                            <td>{{ package.version }}</td>
+                            <td>{{ package.provider }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

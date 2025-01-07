@@ -1,0 +1,52 @@
+$colors: (
+    'primary': (
+        hex: #CA402B,
+        variable: var(--ht-color--primary),
+        text-color: var(--ht-color--white),
+    ),
+    'success': (
+        hex: #5FAD56,
+        variable: var(--ht-color--success),
+        text-color: var(--ht-color--black),
+    ),
+    'info': (
+        hex: #48ACF0,
+        variable: var(--ht-color--info),
+        text-color: var(--ht-color--black),
+    ),
+    'warning': (
+        hex: #F5BB00,
+        variable: var(--ht-color--warning),
+        text-color: var(--ht-color--black),
+    ),
+    'danger': (
+        hex: #DC3545,
+        variable: var(--ht-color--danger),
+        text-color: var(--ht-color--white),
+    ),
+    'gray': (
+        hex: #D2D2D2,
+        variable: var(--ht-color--gray),
+        text-color: var(--ht-color--black),
+    ),
+    'gray-light': (
+        hex: #F4F4F4,
+        variable: var(--ht-color--gray-light),
+        text-color: var(--ht-color--black),
+    ),
+    'gray-dark': (
+        hex: #414141,
+        variable: var(--ht-color--gray-dark),
+        text-color: var(--ht-color--white),
+    ),
+    'black': (
+        hex: #000000,
+        variable: var(--ht-color--black),
+        text-color: var(--ht-color--white),
+    ),
+    'white': (
+        hex: #ffffff,
+        variable: var(--ht-color--white),
+        text-color: var(--ht-color--black),
+    )
+);

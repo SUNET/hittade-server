@@ -1,0 +1,12 @@
+.ht-flex {
+    display: flex;
+    gap: 1.5rem;
+
+    &.-center {
+        justify-content: center;
+    }
+
+    &.-middle {
+        align-items: center;
+    }
+}

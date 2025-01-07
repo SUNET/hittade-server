@@ -1,0 +1,20 @@
+{% extends "dashboard.html" %}
+
+{% block content %}
+    <div class="ht-scrollable">
+        <table class="ht-table">
+            <thead>
+                <tr>
+                    <th scope="col">Host name</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for host in hosts %}
+                <tr>
+                    <td> <a href="{% url 'servers:host' host.id %}">{{ host.hostname }}</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

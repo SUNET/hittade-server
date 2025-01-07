@@ -37,6 +37,7 @@ INTERNAL_IPS = [
 # Application definition
 
 INSTALLED_APPS = [
+    "start_page",
     "servers.apps.ServersConfig",
     "containers.apps.ContainersConfig",
     "django.contrib.admin",
@@ -150,6 +151,7 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
 

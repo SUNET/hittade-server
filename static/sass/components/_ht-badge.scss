@@ -1,0 +1,18 @@
+@use 'sass:map';
+@use '../mixins/colors';
+
+.ht-badge {
+    padding: 4px 8px;
+    display: inline-block;
+    border-radius: 4px;
+    font-weight: 600;
+    background-color: var(--ht-badge--background, var(--ht-color--black));
+    color: var(--ht-badge--color, var(--ht-color--white));
+
+    @each $key, $color in colors.$colors {
+        &.-#{$key} {
+            --ht-badge--background: #{map.get($color, variable)};
+            --ht-badge--color: #{map.get($color, text-color)};
+        }
+    }
+}

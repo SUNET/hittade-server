@@ -1,19 +1,19 @@
 {% extends "servers/base.html" %}
-{% block title %}Search Page{% endblock %}
+{% block title %}Welcome to server/host details page{% endblock %}
 
 {% block content %}
-<div class="container-md">
-    <div class="m-5">
-        <p class="md-5">This is a web application to search across our Infrastructure for read only data.</p>
-
-        <p>Using the left hand side menu you can either search across all the hosts we manage, or in the list of
-            containers we manage. Search for a particular package and see which all servers/hosts have it right now. You
-            can also find the latest containers with a particular package.
-        <p>
-        <div class="alert alert-danger" role="alert">
-            After you login for the first time, you will have to inform Kushal (for the test server) to give you access.
+<div class="container-md m-5">
+    {% for osd, values in osdetails.items %}
+    <details>
+        <summary class="h2">{{ osd }}</summary>
+        <div class="container-md m5">
+            {% for value in values %}
+            <ul class="list-group">
+                <li class="list-group-item"><a href="{% url 'servers:host' value.1 %}"> {{ value.0 }}</a></li>
+            </ul>
+            {% endfor %}
         </div>
-    </div>
+    </details>
+    {% endfor %}
 </div>
-
 {% endblock %}

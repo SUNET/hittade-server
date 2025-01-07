@@ -1,0 +1,37 @@
+{% extends "dashboard.html" %}
+
+{% block content %}
+    <div class="ht-container">
+        <div class="ht-scrollable">
+            <table class="ht-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Container</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cb in cbs %}
+                    <tr>
+                        <td> <a href="{% url 'containers:cbase' cb.cid %}">{{ cb.fullname }}</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if page.has_other_pages %}
+            <div class="ht-pagination">
+                {% if page.has_previous %}
+                    <a class="nav -prev" href="{% url 'containers:containers' %}?page={{page.previous_page_number}}" aria-label="Go to the previous page of containers">Prev</a>
+                {% else %}
+                    <span class="nav -prev -disabled">Prev</span>
+                {% endif %}
+                <span>{{ page }}</span>
+                {% if page.has_next %}
+                    <a class="nav -next" href="{% url 'containers:containers' %}?page={{page.next_page_number}}" aria-label="Go to the next page to see more containers">Next</a>
+                {% else %}
+                    <span class="nav -next -disabled">Next</span>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

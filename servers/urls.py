@@ -4,7 +4,7 @@ from . import views
 
 app_name = "servers"
 urlpatterns = [
-    path("", views.index2, name="index2"),
+    path("", views.index, name="index"),
     # path("add/", views.add, name="add"),
     path("package/<int:pk>", views.package, name="package"),
     path("host/<int:pk>", views.host, name="host"),

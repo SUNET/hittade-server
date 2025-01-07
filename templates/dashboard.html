@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block head %}
+    <script defer src="{% static 'js/dashboard-header.js' %}"></script>
+{% endblock %}
+
+{% block body %}
+    <a href="#main-content" class="ht-skip-link">Skip to content</a>
+    <div class="ht-dashboard">
+        <aside class="sidebar" aria-label="Sidebar">
+            <header id="dashboard-header" class="ht-dashboard-header" aria-label="Header menu">
+                <figure class="title" aria-label="Sunet">
+                    <img src="/static/img/sunet.svg" alt="Sunet" class="logo">
+                    <span class="ht-heading -l">Hittade</span>
+                </figure>
+                <button id="dashboard-header-hamburger" class="hamburger ht-button -gray" aria-expanded="false" aria-controls="dashboard-header">Menu</button>
+                <nav class="navigation" aria-label="Main navigation">
+                    <ul class="menu" aria-label="Menu">
+                        <li><a class="link -home" href="/" aria-label="Go to the homepage">Home</a></li>
+                        <li>
+                            <a class="link -servers" href="/servers" aria-label="View all servers">Servers</a>
+                            <ul class="submenu">
+                                <li><a href="/servers/hosts" class="sublink" aria-label="View all hosts">All hosts</a></li>
+                                <li><a href="/servers/search" class="sublink" aria-label="Search through all hosts">Search hosts</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a class="link -containers" href="/containers" aria-label="View all containers">Containers</a>
+                            <ul class="submenu">
+                                <li><a href="/containers/containers" class="sublink" aria-label="View all containers">All containers</a></li>
+                                <li><a href="/containers/search" class="sublink" aria-label="Search through all containers">Search containers</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </nav>
+                <form class="logout" method="POST" action="{% url 'logout' %}" aria-label="Logout form">
+                    {% csrf_token %}
+                    <button type="submit" class="button" aria-label="Log out">Log out</button>
+                </form>
+            </header>
+        </aside>
+        <main id="main-content" class="main" aria-label="Main content">
+            {% block main %}
+                <div class="ht-content">
+                    <div class="ht-container">
+                        {% block title %}
+                            <h1 class="ht-heading -xl _mb">{{ title }}</h1>
+                        {% endblock %}
+                    </div>
+                    {% block content %}{% endblock %}
+                </div>
+            {% endblock %}
+        </main>
+    </div>
+{% endblock %}

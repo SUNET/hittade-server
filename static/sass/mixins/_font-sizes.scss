@@ -1,0 +1,41 @@
+$font-sizes: (
+    'xs': (
+        px: 14px,
+        rem: .875rem,
+        variable: var(--ht-font-size--xs),
+    ),
+    's': (
+        px: 16px,
+        rem: 1rem,
+        variable: var(--ht-font-size--s),
+    ),
+    'default': (
+        px: 18px,
+        rem: 1.125rem,
+        variable: var(--ht-font-size),
+    ),
+    'm': (
+        px: 25px,
+        rem: 1.5625rem,
+        variable: var(--ht-font-size--m),
+        line-height: var(--ht-line-height--m),
+    ),
+    'l': (
+        px: 35px,
+        rem: 2.1875rem,
+        variable: var(--ht-font-size--l),
+        line-height: var(--ht-line-height--l),
+    ),
+    'xl': (
+        px: 50px,
+        rem: 3.125rem,
+        variable: var(--ht-font-size--xl),
+        line-height: var(--ht-line-height--xl),
+    ),
+    'xxl': (
+        px: 60px,
+        rem: 3.75rem,
+        variable: var(--ht-font-size--xxl),
+        line-height: var(--ht-line-height--xxl),
+    ),
+);
