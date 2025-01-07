@@ -8,3 +8,5 @@ django-extensions
 django-debug-toolbar
 pytz
 psycopg2-binary
+pysaml2
+djangosaml2
