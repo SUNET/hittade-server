@@ -37,7 +37,7 @@ INTERNAL_IPS = [
 # Application definition
 
 INSTALLED_APPS = [
-    "start_page",
+    "start_page.apps.StartPageConfig",
     "servers.apps.ServersConfig",
     "containers.apps.ContainersConfig",
     "django.contrib.admin",
