@@ -1,0 +1,39 @@
+publiccodeYmlVersion: "0.4"
+
+name: hittade-server
+url: "https://github.com/SUNET/hittade-server"
+platforms:
+  - web
+
+categories:
+  - it-asset-management
+  - it-security
+
+usedBy:
+  - Sunet
+
+developmentStatus: beta
+
+softwareType: "standalone/web"
+
+description:
+  en:
+    shortDescription: >
+        Inventory of linux hosts and containers.
+
+    longDescription: >
+        A web application showing various packages installed and other details from linux servers and containers.
+
+legal:
+  license: BSD-2-Clause
+
+maintenance:
+  type: "community"
+
+  contacts:
+    - name: Kushal Das <kushal@sunet.se>
+
+localisation:
+  localisationReady: false
+  availableLanguages:
+    - en
