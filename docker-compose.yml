@@ -34,6 +34,11 @@ services:
   web:
     build: .
     image: docker.sunet.se/hittade-server:v0.0.1
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     command: ./docker-entrypoint.sh
     volumes:
       - .:/code
