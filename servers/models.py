@@ -56,6 +56,27 @@ class HostPackages(models.Model):
     packages = models.ManyToManyField(Package)
 
 
+class ConfigValues(models.Model):
+    id: int
+    ctype = models.CharField(max_length=255)
+    name = models.CharField()
+    value = models.CharField()
+
+    class Meta:
+        unique_together = ("ctype", "name", "value")
+        indexes = [
+            models.Index(fields=["ctype", "name"]),
+            models.Index(fields=["ctype", "name", "value"]),
+        ]
+
+
+class HostConfigs(models.Model):
+    id: int
+    time = models.DateTimeField()
+    host = models.ForeignKey(Host, on_delete=models.CASCADE)
+    configs = models.ManyToManyField(ConfigValues)
+
+
 class ContainerImage(models.Model):
     id: int
     image = models.CharField(max_length=100)
