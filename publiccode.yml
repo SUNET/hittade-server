@@ -36,6 +36,7 @@ maintenance:
 
   contacts:
     - name: Kushal Das <kushal@sunet.se>
+    - name: Simon Lagerlöf <contact@smn.codes>
 
 localisation:
   localisationReady: false
