@@ -5,17 +5,10 @@ import orjson
 import pytz
 from django.core.management.base import BaseCommand
 from django.utils.dateparse import parse_datetime
-from servers.models import (
-    ConfigValues,
-    ContainerImage,
-    Host,
-    HostConfigs,
-    HostContainers,
-    HostContainersThrough,
-    HostDetails,
-    HostPackages,
-    Package,
-)
+
+from servers.models import (ConfigValues, ContainerImage, Host, HostConfigs,
+                            HostContainers, HostContainersThrough, HostDetails,
+                            HostPackages, Package)
 from servers.utils import update_latest_hosts
 
 # DB cache for runtime
@@ -72,7 +65,12 @@ class Command(BaseCommand):
                     if "hostname" in data["ec2_metadata"]:
                         hostname = data["ec2_metadata"]["hostname"]
                 if not hostname:
-                    raise KeyError("No hostname found.")
+                    # means no ec2_metadata also avaiable
+                    # we can fallback to fqdn
+                    if "networking" in data:
+                        hostname = data.get("networking").get("fqdn", "")
+                    if not hostname:
+                        raise KeyError("No hostname found.")
             # Easier to work with values
             if "values" in data:
                 values = data["values"]
