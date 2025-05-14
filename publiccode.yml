@@ -23,6 +23,10 @@ description:
 
     longDescription: >
         A web application showing various packages installed and other details from linux servers and containers.
+    features:
+      - server inventory
+      - container inventory
+      - package searching
 
 legal:
   license: BSD-2-Clause
