@@ -48,18 +48,24 @@
     </div>
 </div>
 <div class="ht-containers">
-    <h3 class="ht-heading -m">Configuration details</h3>
-    <table class="ht-table">
-        <tbody>
-            {% for config in configurations %}
-            <tr>
-                <th>{{ config.ctype }}</th>
-                <td>{{ config.name }}</td>
-                <td>{{ config.value }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <h3 class="ht-heading -m _mb">Configuration details</h3>
+    {% for config_id, config_settings in configurations.items %}
+        <details class="ht-details">
+            <summary class="summary"><strong>{{ config_id }}</strong></summary>
+            <div class="ht-scrollable">
+                <table class="ht-table -vertical-heads">
+                    <tbody>
+                        {% for name, value in config_settings.items %}
+                        <tr>
+                            <th>{{ name }}</th>
+                            <td>{{ value }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </details>
+    {% endfor %}
 </div>
 <div class="ht-container">
    <div class="ht-flex">

@@ -12,7 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .forms import SearchForm
 from .models import (ConfigValues, Host, HostConfigs, HostContainers,
                      HostDetails, HostPackages, Package)
-from .utils import get_osdetails
+from .utils import get_osdetails, generate_host_configurations_dict
 
 
 def logout_view(request):
@@ -64,7 +64,7 @@ def host(request, pk):
             "packages": host_packages.packages.all(),
             "containers": cdetails,
             "details": details,
-            "configurations": host_configs.configs.all(),
+            "configurations": generate_host_configurations_dict(host_configs.configs.all()),
         },
     )
 

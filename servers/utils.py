@@ -63,3 +63,16 @@ def delete_all_host_cache():
     keys = r.keys("latesth:*")
     for key in keys:
         r.delete(key)
+
+
+def generate_host_configurations_dict(input: list) -> dict:
+    "Generate dict of configuration files, for use by frontend."
+    configurations = {}
+
+    for configuration in input:
+        if configuration.ctype not in configurations:
+            configurations[configuration.ctype] = {}
+
+        configurations[configuration.ctype][configuration.name] = configuration.value
+
+    return configurations
