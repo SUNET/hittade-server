@@ -8,6 +8,10 @@ services:
       #- internal_network
     healthcheck:
       test: ['CMD', 'pg_isready', '-U', 'postgres']
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 80s 
     volumes:
       - ./db:/var/lib/postgresql/data
     environment:
@@ -20,17 +24,24 @@ services:
       #- internal_network
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 80s 
     volumes:
       - ./redis:/data
 
   web:
     build: .
     image: docker.sunet.se/hittade-server:v0.0.1
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     command: ./docker-entrypoint.sh
     volumes:
       - .:/code
     ports:
       - "8000:8000"
-    depends_on:
-      - redis
-      - db
+        
