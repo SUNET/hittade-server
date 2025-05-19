@@ -4,16 +4,15 @@ from typing import Any, DefaultDict
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import OuterRef, Subquery
-
 # Create your views here.
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
 
 from .forms import SearchForm
-from .models import Host, HostContainers, HostDetails, HostPackages, Package
-from .utils import get_osdetails
-
+from .models import (ConfigValues, Host, HostConfigs, HostContainers,
+                     HostDetails, HostPackages, Package)
+from .utils import get_osdetails, generate_host_configurations_dict
 
 
 def logout_view(request):
@@ -51,6 +50,7 @@ def package(request, pk):
 def host(request, pk):
     host = Host.objects.get(pk=pk)
     host_packages = HostPackages.objects.filter(host=host).order_by("-time")[0]
+    host_configs = HostConfigs.objects.filter(host=host).order_by("-time")[0]
     host_containers = HostContainers.objects.filter(host=host).order_by("-time")[0]
     cdetails = host_containers.hostcontainersthrough_set.all().prefetch_related()
     details = HostDetails.objects.filter(host=host).order_by("-time")[0]
@@ -64,6 +64,7 @@ def host(request, pk):
             "packages": host_packages.packages.all(),
             "containers": cdetails,
             "details": details,
+            "configurations": generate_host_configurations_dict(host_configs.configs.all()),
         },
     )
 

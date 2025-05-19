@@ -5,20 +5,16 @@ import orjson
 import pytz
 from django.core.management.base import BaseCommand
 from django.utils.dateparse import parse_datetime
-from servers.models import (
-    ContainerImage,
-    Host,
-    HostContainers,
-    HostContainersThrough,
-    HostDetails,
-    HostPackages,
-    Package,
-)
+
+from servers.models import (ConfigValues, ContainerImage, Host, HostConfigs,
+                            HostContainers, HostContainersThrough, HostDetails,
+                            HostPackages, Package)
 from servers.utils import update_latest_hosts
 
 # DB cache for runtime
 PACKAGES = {}
 CONTAINERS = {}
+CONFIGVALUES = {}
 
 
 class Command(BaseCommand):
@@ -69,7 +65,12 @@ class Command(BaseCommand):
                     if "hostname" in data["ec2_metadata"]:
                         hostname = data["ec2_metadata"]["hostname"]
                 if not hostname:
-                    raise KeyError("No hostname found.")
+                    # means no ec2_metadata also avaiable
+                    # we can fallback to fqdn
+                    if "networking" in data:
+                        hostname = data.get("networking").get("fqdn", "")
+                    if not hostname:
+                        raise KeyError("No hostname found.")
             # Easier to work with values
             if "values" in data:
                 values = data["values"]
@@ -144,6 +145,37 @@ class Command(BaseCommand):
         # Now we have all the packages
         hpackages.packages.add(*ps)
         hpackages.save()
+
+        # Save sshd configuration values from hosts
+        hconfigs = HostConfigs(host=host, time=created_at)
+        hconfigs.save()
+
+        cs = []
+        if "sshd_config" in values:
+            config_values = values.get("sshd_config", {})
+            for k, v in config_values.items():
+                try:
+                    key_text = f"sshd_config:{k}"
+                    if key_text in CONFIGVALUES:
+                        configvalue = CONFIGVALUES[key_text]
+                    else:
+                        configvalue, _ = ConfigValues.objects.get_or_create(
+                            ctype="sshd_config", name=k, value=v
+                        )
+                        CONFIGVALUES[key_text] = configvalue
+
+                    cs.append(configvalue)
+                except Exception as e:
+                    self.stderr.write(
+                        self.style.ERROR(
+                            f"Error adding configuration {k} with {v} with error: {str(e)}"
+                        )
+                    )
+                    continue
+            # TODO: move this block outside of if when we have more configs
+            # Now we have all the config values
+            hconfigs.configs.add(*cs)
+            hconfigs.save()
 
         # Save the running containers on the host
         hcontainers = HostContainers(host=host, time=created_at)

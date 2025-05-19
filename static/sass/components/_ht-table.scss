@@ -25,6 +25,10 @@
             border-bottom: 1px solid var(--ht-color--gray); 
         }
 
+        &:nth-child(odd) {
+            background-color: var(--ht-color--white); 
+        }
+
         &:nth-child(even) {
             background-color: var(--ht-color--gray-light); 
         }
