@@ -33,6 +33,11 @@ class PackageSchema(Schema):
     version: str
 
 
+class ServerContainerSchema(Schema):
+    image: str
+    imageid: str
+
+
 class HostConfigurationSchema(Schema):
     ctype: str
     name: str
@@ -43,6 +48,7 @@ class CombinedHostSchema(Schema):
     host: HostSchema
     details: HostDetailsSchema
     packages: List[PackageSchema]
+    containers: List[ServerContainerSchema]
     configs: List[HostConfigurationSchema]
 
 
@@ -61,13 +67,16 @@ def host_details(request, host_id):
     cdetails = host_containers.hostcontainersthrough_set.all().prefetch_related()
     details = HostDetails.objects.filter(host=host).order_by("-time")[0]
     cd = [c for c in host_configs.configs.all()]
-    pprint(cd)
 
     return {
         "host": HostSchema.model_validate(host),
         "details": HostDetailsSchema.model_validate(details),
         "packages": [
             PackageSchema.model_validate(p) for p in host_packages.packages.all()
+        ],
+        "containers": [
+            ServerContainerSchema.model_validate(hc)
+            for hc in host_containers.containers.all()
         ],
         "configs": [HostConfigurationSchema.model_validate(c) for c in cd],
     }
