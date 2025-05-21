@@ -62,11 +62,17 @@ def list_hosts(request):
 def host_details(request, host_id):
     host = Host.objects.get(pk=host_id)
     host_packages = HostPackages.objects.filter(host=host).order_by("-time")[0]
-    host_configs = HostConfigs.objects.filter(host=host).order_by("-time")[0]
+    try:
+        host_configs = HostConfigs.objects.filter(host=host).order_by("-time")[0]
+    except IndexError:
+        host_configs = []
     host_containers = HostContainers.objects.filter(host=host).order_by("-time")[0]
     cdetails = host_containers.hostcontainersthrough_set.all().prefetch_related()
     details = HostDetails.objects.filter(host=host).order_by("-time")[0]
-    cd = [c for c in host_configs.configs.all()]
+    if host_configs:
+        cd = [c for c in host_configs.configs.all()]
+    else:
+        cd = []
 
     return {
         "host": HostSchema.model_validate(host),
