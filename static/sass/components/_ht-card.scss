@@ -1,0 +1,29 @@
+@use 'sass:map';
+@use '../mixins/colors';
+
+.ht-card {
+    padding: 30px;
+    border-radius: var(--ht-border-radius);
+    background-color: var(--ht-button--background, var(--ht-color--white));
+    color: var(--ht-button--color, var(--ht-color--black));
+
+    &:not(.-outline) {
+        // box-shadow: var(--ht-box-shadow);
+        border: initial;
+    }
+
+    &.-outline {
+        background-color: transparent;
+        color: var(--ht-button--background, currentColor);
+        border: 2px solid currentColor;
+    }
+
+    @each $key, $color in colors.$colors {
+        &.-#{$key} {
+            --ht-button--background: #{map.get($color, variable)};
+            --ht-button--color: #{map.get($color, text-color)};
+        }
+    }
+}
+
+

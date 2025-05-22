@@ -23,11 +23,23 @@ body {
 a {
     color: currentColor;
     text-decoration: none;
+    font-weight: bold;
 
     &:hover {
         text-decoration: underline;
     }
 }
+
+:is(a, button) {
+  &:focus {
+    outline: 3px solid var(--ht-color--info);
+  }
+
+  &:is(:active:focus, :focus:not(:focus-visible)) {
+    outline: none;
+  }
+}
+
 
 strong, b {
     font-weight: bold;
