@@ -13,11 +13,18 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for cb in data %}
-                    <tr>
-                        <td><a href="{% url 'containers:cbase' cb.cid %}">{{ cb.fullname }} </a></td>
-                    </tr>
+                    {% if data|length >= 1 %}
+                        {% for cb in data %}
+                        <tr>
+                            <td><a href="{% url 'containers:cbase' cb.cid %}">{{ cb.fullname }} </a></td>
+                        </tr>
                     {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td>No packages available</td>
+                        </tr>
+                    {% endif %}
+                    
                 </tbody>
             </table>
         </div>
