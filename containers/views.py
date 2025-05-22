@@ -16,7 +16,8 @@ from .utils import latest_containers
 def index(request):
     return redirect(search)
 
-
+@login_required
+@permission_required("containers.view_containerbase", raise_exception=True)
 def package(request, pk):
     package = ContainerPackage.objects.get(pk=pk)
     latest = latest_containers()
