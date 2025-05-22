@@ -1,12 +1,45 @@
 {% extends "dashboard.html" %}
 
+{% block sidebar %}
+<div class="ht-notice -info" aria-labelledby="access-note-heading">
+    <h2 id="access-note-heading" class="ht-heading">Note:</h2>
+    <p class="ht-text -s">After you login for the first time, you will have to inform Kushal (for the test server) to give you access.</p>
+</div>
+{% endblock %}
+
 {% block main %}
-    <div class="ht-content -center -middle -narrow">
-        <h1 class="ht-heading -xxl -center">Hittade server</h1>
-        <p class="ht-text -m -bold -center">This is a web application to search across our Infrastructure for read only data.</p>
-        <div class="ht-notice -info" aria-labelledby="access-note-heading">
-            <h2 id="access-note-heading" class="ht-heading">Note:</h2>
-            <p class="ht-text -s">After you login for the first time, you will have to inform Kushal (for the test server) to give you access.</p>
+    <div class="ht-content">
+        <h1 class="ht-heading -xl _mb">Hittade Server</h1>
+        <div class="ht-grid -col:2">
+            {% if servers %}
+                <div class="ht-card -gray-light" aria-labelledby="servers-info">
+                    <div class="ht-flex -middle -space-between">
+                        <h2 id="servers-info" class="ht-heading -l">Servers</h2>
+                        <a href="{% url 'servers:hosts' %}">View All</a>
+                    </div>
+                    <div class="ht-container">
+                        <h3 class="ht-heading">At a glance</h3>
+                        <p class="ht-text -s">
+                            The <strong>{{ servers.count }}</strong> servers in <em>Hittade</em> run a total of 
+                            <strong>{{ servers.os_count }}</strong> different operating systems. The most common is 
+                            <em>{{ servers.most_common_os }}</em>, used by <strong>{{ servers.most_common_os_count }}</strong> servers. 
+                            Across all servers, <strong>{{ servers.package_count }}</strong> software packages are in use, with 
+                            <em>{{ servers.most_common_package }}</em> being the most widely deployed, running on 
+                            <strong>{{ servers.most_common_package_count }}</strong> machines.
+                        </p>
+                    </div>
+                    <div>
+                        <h3 class="ht-heading">Recently added</h3>
+                        <ul class="ht-list">
+                            {% for host in servers.recents %}
+                            <li class="ht-text -s">
+                                <a href="{% url 'servers:host' host.id %}">{{ host.hostname }}</a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
         </div>
     </div>
 {% endblock %}
