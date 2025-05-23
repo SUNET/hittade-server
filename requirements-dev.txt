@@ -1,5 +1,6 @@
 django
 django-types
+django-ninja
 orjson
 black
 ruff

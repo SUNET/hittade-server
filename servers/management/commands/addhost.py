@@ -6,9 +6,17 @@ import pytz
 from django.core.management.base import BaseCommand
 from django.utils.dateparse import parse_datetime
 
-from servers.models import (ConfigValues, ContainerImage, Host, HostConfigs,
-                            HostContainers, HostContainersThrough, HostDetails,
-                            HostPackages, Package)
+from servers.models import (
+    ConfigValues,
+    ContainerImage,
+    Host,
+    HostConfigs,
+    HostContainers,
+    HostContainersThrough,
+    HostDetails,
+    HostPackages,
+    Package,
+)
 from servers.utils import update_latest_hosts
 
 # DB cache for runtime
@@ -86,12 +94,18 @@ class Command(BaseCommand):
                 )
             system_packages = values["packages"][0]
             domain = values.get("domain", None)
+            if not domain:
+                domain = data.get("networking").get("domain")
             osname = values["os"]["name"]
             osrelease = values["os"]["release"]["full"]
             rkr = values["running-kernel"]["kernel-release"]
             cosmosrepourl = values.get("cosmos_repo_origin_url", None)
             ipv4 = values.get("ipaddress", None)
+            if not ipv4:
+                ipv4 = data.get("networking").get("ip", None)
             ipv6 = values.get("ipaddress6", None)
+            if not ipv6:
+                ipv6 = data.get("networking").get("ip6", None)
             fail2ban_text = values.get("fail2ban_is_enabled", "no").lower().strip()
             if fail2ban_text == "no":
                 fail2ban = False

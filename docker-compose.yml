@@ -33,7 +33,7 @@ services:
 
   web:
     build: .
-    image: docker.sunet.se/hittade-server:v0.0.1
+    image: docker.sunet.se/hittade-server:v0.0.2
     depends_on:
       db:
         condition: service_healthy
