@@ -5,8 +5,7 @@ from typing import List, Optional
 from ninja import NinjaAPI, Schema
 from ninja.pagination import PageNumberPagination, paginate
 
-from servers.models import (Host, HostConfigs, HostContainers, HostDetails,
-                            HostPackages)
+from servers.models import Host, HostConfigs, HostContainers, HostDetails, HostPackages
 
 api = NinjaAPI()
 
@@ -69,6 +68,7 @@ def get_host_config(request, host_id):
     except IndexError:
         cd = []
     return [HostConfigurationSchema.model_validate(c) for c in cd]
+
 
 @api.get("/host/{host_id}", response=CombinedHostSchema)
 def host_details(request, host_id):
