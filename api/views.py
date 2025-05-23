@@ -5,7 +5,8 @@ from typing import List, Optional
 from ninja import NinjaAPI, Schema
 from ninja.pagination import PageNumberPagination, paginate
 
-from servers.models import Host, HostConfigs, HostContainers, HostDetails, HostPackages
+from servers.models import (Host, HostConfigs, HostContainers, HostDetails,
+                            HostPackages)
 
 api = NinjaAPI()
 
@@ -57,6 +58,17 @@ class CombinedHostSchema(Schema):
 def list_hosts(request):
     return Host.objects.all().order_by("hostname")
 
+
+@api.get("/host/{host_id}/config", response=List[HostConfigurationSchema])
+def get_host_config(request, host_id):
+    """Returns only the host configuration entries."""
+    host = Host.objects.get(pk=host_id)
+    try:
+        host_configs = HostConfigs.objects.filter(host=host).order_by("-time").first()
+        cd = [c for c in host_configs.configs.all()]
+    except IndexError:
+        cd = []
+    return [HostConfigurationSchema.model_validate(c) for c in cd]
 
 @api.get("/host/{host_id}", response=CombinedHostSchema)
 def host_details(request, host_id):
