@@ -4,15 +4,23 @@ from typing import Any, DefaultDict
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import OuterRef, Subquery
+
 # Create your views here.
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
 
 from .forms import SearchForm
-from .models import (ConfigValues, Host, HostConfigs, HostContainers,
-                     HostDetails, HostPackages, Package)
-from .utils import get_osdetails, generate_host_configurations_dict
+from .models import (
+    ConfigValues,
+    Host,
+    HostConfigs,
+    HostContainers,
+    HostDetails,
+    HostPackages,
+    Package,
+)
+from .utils import generate_host_configurations_dict, get_osdetails
 
 
 def logout_view(request):
@@ -39,8 +47,8 @@ def package(request, pk):
         "servers/package.html",
         {
             "title": f"Package: {package.name} - {package.version}",
-            "package": package, 
-            "hosts": hosts_with_package
+            "package": package,
+            "hosts": hosts_with_package,
         },
     )
 
@@ -50,10 +58,18 @@ def package(request, pk):
 def host(request, pk):
     host = Host.objects.get(pk=pk)
     host_packages = HostPackages.objects.filter(host=host).order_by("-time")[0]
-    host_configs = HostConfigs.objects.filter(host=host).order_by("-time")[0]
+    try:
+        host_configs = HostConfigs.objects.filter(host=host).order_by("-time")[0]
+    except IndexError:
+        host_configs = []
     host_containers = HostContainers.objects.filter(host=host).order_by("-time")[0]
     cdetails = host_containers.hostcontainersthrough_set.all().prefetch_related()
     details = HostDetails.objects.filter(host=host).order_by("-time")[0]
+
+    if host_configs:
+        config_from_db = host_configs.configs.all()
+    else:
+        config_from_db = []
 
     return render(
         request,
@@ -64,7 +80,7 @@ def host(request, pk):
             "packages": host_packages.packages.all(),
             "containers": cdetails,
             "details": details,
-            "configurations": generate_host_configurations_dict(host_configs.configs.all()),
+            "configurations": generate_host_configurations_dict(config_from_db),
         },
     )
 
@@ -109,15 +125,15 @@ def search(request):
         form = SearchForm()
 
     return render(
-        request, 
-        "servers/search.html", 
+        request,
+        "servers/search.html",
         {
             "title": "Search",
-            "form": form, 
-            "data": data, 
+            "form": form,
+            "data": data,
             "text": text,
             "stype": stype,
-        }
+        },
     )
 
 
@@ -154,4 +170,6 @@ def index(request):
         osdetails = f"{ld.osname}-{ld.osrelease}"
         data[osdetails].append((host.hostname, host.id))
 
-    return render(request, "servers/index.html", {"title": "Servers", "osdetails": dict(data)})
+    return render(
+        request, "servers/index.html", {"title": "Servers", "osdetails": dict(data)}
+    )
