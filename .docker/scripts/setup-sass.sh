@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=1.83.0;
+VERSION=1.89.2;
 
 URL="https://github.com/sass/dart-sass/releases/download/${VERSION}/dart-sass-${VERSION}-linux-x64.tar.gz";
 
