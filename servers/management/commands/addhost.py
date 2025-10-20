@@ -194,7 +194,7 @@ class Command(BaseCommand):
             key_text = ""
             v = ""
             try:
-                key_text = "hiera_meta:meta_service_name"
+                key_text = "meta_service_name"
                 h_value = hiera_values.get("meta_service_name")
                 v = h_value  # For debug error message
                 if h_value:
@@ -205,7 +205,7 @@ class Command(BaseCommand):
                     cs.append(configvalue)
                 if "meta_service_dependencies" in hiera_values:
                     # Now loop over the data and save to db
-                    key_text = "hiera_meta:meta_service_dependencies"
+                    key_text = "meta_service_dependencies"
                     for name in hiera_values.get("meta_service_dependencies", []):
                         v = h_value  # For debug error message
                         configvalue, _ = ConfigValues.objects.get_or_create(
