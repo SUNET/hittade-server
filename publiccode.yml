@@ -1,4 +1,4 @@
-publiccodeYmlVersion: "0.4"
+publiccodeYmlVersion: "0"
 
 name: hittade-server
 url: "https://github.com/SUNET/hittade-server"
@@ -22,7 +22,10 @@ description:
         Inventory of linux hosts and containers.
 
     longDescription: >
-        A web application showing various packages installed and other details from linux servers and containers.
+        A small Django based web application that parses input JSON files
+        describing Linux servers and containers (using redis/valkey for
+        caching) and exposes their state, installed packages and other
+        host details via a searchable web interface.
     features:
       - server inventory
       - container inventory
