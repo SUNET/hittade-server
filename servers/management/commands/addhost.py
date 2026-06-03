@@ -186,7 +186,41 @@ class Command(BaseCommand):
                         )
                     )
                     continue
-            # TODO: move this block outside of if when we have more configs
+
+        # Now for hiera_meta
+        if "hiera_meta" in values:
+            hiera_values = values.get("hiera_meta", {})
+            # First name
+            key_text = ""
+            v = ""
+            try:
+                key_text = "meta_service_name"
+                h_value = hiera_values.get("meta_service_name")
+                v = h_value  # For debug error message
+                if h_value:
+                    # Now add to db or list
+                    configvalue, _ = ConfigValues.objects.get_or_create(
+                        ctype="hiera_meta", name=key_text, value=h_value
+                    )
+                    cs.append(configvalue)
+                if "meta_service_dependencies" in hiera_values:
+                    # Now loop over the data and save to db
+                    key_text = "meta_service_dependencies"
+                    for name in hiera_values.get("meta_service_dependencies", []):
+                        v = h_value  # For debug error message
+                        configvalue, _ = ConfigValues.objects.get_or_create(
+                            ctype="hiera_meta", name=key_text, value=name
+                        )
+                        cs.append(configvalue)
+            except Exception as e:
+                self.stderr.write(
+                    self.style.ERROR(
+                        f"Error adding configuration {key_text} with {v} with error: {str(e)}"
+                    )
+                )
+
+        # TODO: move this block outside of if when we have more configs
+        if cs:
             # Now we have all the config values
             hconfigs.configs.add(*cs)
             hconfigs.save()

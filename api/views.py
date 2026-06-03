@@ -3,9 +3,10 @@ from pprint import pprint
 from typing import List, Optional
 
 from ninja import NinjaAPI, Schema
-from ninja.pagination import PageNumberPagination, paginate
+from ninja.pagination import LimitOffsetPagination, paginate
 
-from servers.models import Host, HostConfigs, HostContainers, HostDetails, HostPackages
+from servers.models import (Host, HostConfigs, HostContainers, HostDetails,
+                            HostPackages)
 
 api = NinjaAPI()
 
@@ -53,7 +54,7 @@ class CombinedHostSchema(Schema):
 
 
 @api.get("/hosts", response=List[HostSchema])
-@paginate(PageNumberPagination)
+@paginate(LimitOffsetPagination)
 def list_hosts(request):
     return Host.objects.all().order_by("hostname")
 
