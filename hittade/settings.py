@@ -162,3 +162,17 @@ REDIS = {
     "port": 6379,
     "db": 0,
 }
+
+
+# If we have a localsettings.py file, import everything from there and
+# use.
+try:
+    from . import localsettings
+
+    # now see if we need to override any settings
+    for variable in dir(localsettings):
+        if not variable.startswith("__"):
+            # Then we set it
+            globals()[variable] = getattr(localsettings, variable)
+except:
+    pass
