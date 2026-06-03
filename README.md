@@ -9,12 +9,15 @@ containers.
 
 ## Development setup
 
+This project uses [uv](https://docs.astral.sh/uv/) for dependency management.
+
 ```bash
 sudo systemctl start redis
-python3 -m venv .venv
-source .venv/bin/activate
-python3 -m pip install -r requirements-dev.txt
+uv sync --extra dev
 ```
+
+`uv sync` creates a `.venv` and installs the locked dependencies. Run commands
+through `uv run`, e.g. `uv run ./manage.py migrate`.
 
 Alternatively, use Docker:
 ```bash
