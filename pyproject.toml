@@ -20,6 +20,8 @@ dependencies = [
     "pysaml2",
     "djangosaml2",
     "lib4sbom",
+    "whitenoise>=6.12.0",
+    "granian>=2.7.5",
 ]
 
 [project.optional-dependencies]

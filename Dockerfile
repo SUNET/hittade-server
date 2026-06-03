@@ -34,8 +34,12 @@ EOT
 
 RUN <<EOT
 apt-get clean
-apt update && apt install xmlsec1 curl -y
+apt update && apt install xmlsec1 curl locales -y
 apt dist-upgrade -y
+
+# Generate a UTF-8 locale so the `locale` command and Python report en_US.UTF-8.
+sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
+locale-gen
 
 # dart-sass is invoked by docker-entrypoint.sh to build the stylesheets.
 SASS_VERSION=1.89.2
@@ -44,6 +48,9 @@ ln -s /opt/dart-sass/sass /usr/local/bin/sass
 
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 EOT
+ENV LANG=en_US.UTF-8 \
+    LANGUAGE=en_US:en \
+    LC_ALL=en_US.UTF-8
 # Copy from the build container
 COPY --from=build --chown=app:app /app /app
 COPY --chown=app:app ./hittade /app/hittade

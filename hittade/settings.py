@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -23,7 +24,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-_^0@=cfau=nt&j*cce#ae2q-8k6_0ul6$+fliky$jdp-+qt6tk"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Resolved from the environment before STORAGES below, so production
+# (DEBUG=false) selects the manifest static storage. localsettings.py
+# (imported at the end of this file) can still override it for other uses.
+DEBUG = os.environ.get("DEBUG", "True").lower() in ("true", "1", "yes")
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
@@ -31,7 +35,6 @@ INTERNAL_IPS = [
     # ...
     "127.0.0.1",
     "localhost",
-    "10.89.0.21",
     # ...
 ]
 # Application definition
@@ -53,6 +56,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -145,7 +149,24 @@ USE_TZ = True
 
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+
+# Collected/served static files (populated by `manage.py collectstatic`).
+# WhiteNoise serves these in production regardless of DEBUG.
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Use CompressedManifestStaticFilesStorage in production (requires collectstatic);
+# fall back to CompressedStaticFilesStorage in DEBUG (no manifest needed).
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"
+        if DEBUG
+        else "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

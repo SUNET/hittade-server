@@ -48,7 +48,10 @@
         &.-#{$key} {
             --ht-notice--background: #{map.get($color, variable)};
             --ht-notice--text: #{map.get($color, text-color)};
-            --ht-notice--icon: url('/static/icons/#{$icon}.svg');
+
+            @if $icon != '' {
+                --ht-notice--icon: url('/static/icons/#{$icon}.svg');
+            }
         }
     }
 }   
