@@ -17,8 +17,10 @@ class ApiKeyAuth(APIKeyHeader):
     param_name = "X-API-Key"
 
     def authenticate(self, request, key):
+        if not key:
+            return None
         try:
-            api_key = APIKey.objects.get(key=key, active=True)
+            api_key = APIKey.objects.get(key_hash=APIKey.hash_key(key), active=True)
         except APIKey.DoesNotExist:
             return None
         APIKey.objects.filter(pk=api_key.pk).update(last_used=timezone.now())

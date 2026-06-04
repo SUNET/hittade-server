@@ -27,6 +27,8 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "black",
+    "pytest>=9.0.3",
+    "pytest-django>=4.12.0",
     "ruff",
 ]
 
@@ -40,6 +42,13 @@ Home = "https://github.com/SUNET/hittade-server"
 # --locked` builds reproducible across hosts and the UTC build container.
 # Bump deliberately when updating dependencies.
 exclude-newer = "2026-06-03T00:00:00Z"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "hittade.settings_test"
+testpaths = ["tests"]
+pythonpath = ["."]
+python_files = ["test_*.py"]
+filterwarnings = ["ignore::DeprecationWarning"]
 
 [tool.ruff]
 line-length = 100
