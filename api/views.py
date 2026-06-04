@@ -2,13 +2,30 @@ from datetime import datetime
 from pprint import pprint
 from typing import List, Optional
 
+from django.utils import timezone
 from ninja import NinjaAPI, Schema
 from ninja.pagination import LimitOffsetPagination, paginate
+from ninja.security import APIKeyHeader
 
 from servers.models import (Host, HostConfigs, HostContainers, HostDetails,
                             HostPackages)
 
-api = NinjaAPI()
+from .models import APIKey
+
+
+class ApiKeyAuth(APIKeyHeader):
+    param_name = "X-API-Key"
+
+    def authenticate(self, request, key):
+        try:
+            api_key = APIKey.objects.get(key=key, active=True)
+        except APIKey.DoesNotExist:
+            return None
+        APIKey.objects.filter(pk=api_key.pk).update(last_used=timezone.now())
+        return api_key
+
+
+api = NinjaAPI(auth=ApiKeyAuth())
 
 
 class HostSchema(Schema):
