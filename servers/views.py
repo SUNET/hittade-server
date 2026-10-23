@@ -154,9 +154,10 @@ def index(request):
         osdetails = get_osdetails()
     except redis.RedisError:
         logger.warning("Redis unavailable, building the servers index from the database")
-        osdetails = {}
-    if not osdetails:
-        # Empty or unavailable cache: compute it (`warmservercache` refills it).
+        osdetails = None
+    if osdetails is None:
+        # Incomplete or unavailable cache: use the database until
+        # `warmservercache` has rebuilt it.
         osdetails = osdetails_from_db()
 
     return render(
