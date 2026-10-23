@@ -3,6 +3,7 @@ import pathlib
 
 import orjson
 import pytz
+import redis
 from django.core.management.base import BaseCommand
 from django.utils.dateparse import parse_datetime
 
@@ -17,7 +18,7 @@ from servers.models import (
     HostPackages,
     Package,
 )
-from servers.utils import osdetails_name, update_latest_hosts
+from servers.utils import cache_host_details, sync_uncached_host_details
 
 # DB cache for runtime
 PACKAGES = {}
@@ -52,6 +53,26 @@ class Command(BaseCommand):
                         )
         else:
             self.add_host_details(filename)
+        self.sync_cache()
+
+    def sync_cache(self):
+        """Repairs cache writes that failed earlier (this run or before).
+
+        Runs even when every file was skipped as already imported, so retrying
+        an import fixes the cache once redis is back.
+        """
+        try:
+            count = sync_uncached_host_details()
+        except redis.RedisError as e:
+            self.stderr.write(
+                self.style.WARNING(
+                    f"Redis cache not updated ({e}); /servers/ uses the database "
+                    "until addhost or warmservercache runs again with redis up."
+                )
+            )
+            return
+        if count:
+            self.stdout.write(self.style.SUCCESS(f"Synced {count} host details to the cache."))
 
     def add_host_details(self, filename):
         "Parses and stores data on database."
@@ -252,8 +273,10 @@ class Command(BaseCommand):
             ipv6=ipv6,
             fail2ban=fail2ban,
         )
-        update_latest_hosts(
-            host.hostname, hd.id, hd.time, host.id, osdetails_name(osname, osrelease)
-        )
+        try:
+            cache_host_details(hd)
+        except redis.RedisError as e:
+            # The row stays uncached; sync_cache() at the end retries it.
+            self.stderr.write(self.style.WARNING(f"Redis cache not updated for {hostname}: {e}"))
 
         self.stdout.write(self.style.SUCCESS(f"Successfully added {hostname}"))

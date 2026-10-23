@@ -107,8 +107,14 @@ def get_osdetails() -> dict[str, list[tuple[str, int]]] | None:
     """Returns osdetails -> [(hostname, host_id), ...] from the cache.
 
     Hosts are ordered newest first (by host id), like the database version.
-    Returns None when the cache is not complete (run warmservercache).
+    Returns None when the cache is not complete: it was never fully rebuilt
+    (run warmservercache), or a HostDetails row is not in it yet (a redis
+    write failed or was interrupted; see sync_uncached_host_details()).
     """
+    from .models import HostDetails
+
+    if HostDetails.objects.filter(cached=False).exists():
+        return None
     pipe = r.pipeline(transaction=True)
     pipe.exists(LATEST_HOSTS_READY_KEY)
     pipe.hgetall(LATEST_HOSTS_KEY)
@@ -168,6 +174,9 @@ def rebuild_latest_hosts() -> int | None:
         # that commits after our read then also updates it (_SET_IF_NEWER).
         r.delete(LATEST_HOSTS_BUILDING_KEY)
         r.hset(LATEST_HOSTS_BUILDING_KEY, BUILDING_PLACEHOLDER, "1")
+        # Rows missing from the cache that the read below will include; rows
+        # committed after this stay uncached until the next sync or rebuild.
+        uncached = _uncached_ids()
         count = 0
         pipe = r.pipeline(transaction=False)
         for host_id, hostname, db_id, time, osname, osrelease in latest_host_rows().iterator():
@@ -190,10 +199,55 @@ def rebuild_latest_hosts() -> int | None:
             args=[BUILDING_PLACEHOLDER],
             client=r,
         )
+        _mark_cached(uncached)
         r.delete(LEGACY_OSDETAILS_KEY, *r.keys(LEGACY_LATEST_PATTERN))
         return count
     finally:
         r.delete(LATEST_HOSTS_LOCK_KEY)
+
+
+def _uncached_ids() -> list[int]:
+    from .models import HostDetails
+
+    return list(
+        HostDetails.objects.filter(cached=False).order_by().values_list("id", flat=True)
+    )
+
+
+def _mark_cached(ids: list[int]):
+    from .models import HostDetails
+
+    for start in range(0, len(ids), 1000):
+        HostDetails.objects.filter(id__in=ids[start : start + 1000]).update(cached=True)
+
+
+def cache_host_details(hd) -> bool:
+    """Puts a new HostDetails into the redis cache, then marks it cached.
+
+    Raises redis.RedisError if redis fails; the row then stays uncached, so the
+    index uses the database until sync_uncached_host_details() repairs it.
+    """
+    updated = update_latest_hosts(
+        hd.host.hostname, hd.id, hd.time, hd.host_id, osdetails_name(hd.osname, hd.osrelease)
+    )
+    _mark_cached([hd.id])
+    return updated
+
+
+def sync_uncached_host_details() -> int:
+    """Applies every HostDetails missing from the redis cache. Returns the count.
+
+    Safe to repeat: older rows never replace newer cache entries. Raises
+    redis.RedisError if redis is still unavailable.
+    """
+    from .models import HostDetails
+
+    rows = HostDetails.objects.filter(cached=False).select_related("host").order_by("id")
+    count = 0
+    for hd in rows.iterator():
+        cache_host_details(hd)
+        count += 1
+    return count
 
 
 def delete_all_host_cache():

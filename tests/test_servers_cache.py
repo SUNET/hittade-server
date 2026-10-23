@@ -1,4 +1,7 @@
+import json
+import tempfile
 from datetime import UTC, datetime, timedelta, timezone
+from pathlib import Path
 from unittest import mock
 
 import fakeredis
@@ -9,6 +12,7 @@ from django.core.management.base import CommandError
 from django.test import TestCase
 
 from servers import utils
+from servers.management.commands import addhost
 from servers.models import Host, HostDetails
 
 T0 = datetime(2026, 10, 1, 12, 0, tzinfo=UTC)
@@ -24,9 +28,7 @@ class CacheTestCase(TestCase):
     def add_details(self, host, time, osname="Debian", osrelease="12"):
         "Adds a HostDetails row and updates the cache, like addhost does."
         hd = HostDetails.objects.create(host=host, time=time, osname=osname, osrelease=osrelease)
-        utils.update_latest_hosts(
-            host.hostname, hd.id, hd.time, host.id, utils.osdetails_name(osname, osrelease)
-        )
+        utils.cache_host_details(hd)
         return hd
 
     def warm(self):
@@ -133,6 +135,95 @@ class CacheCompletenessTests(CacheTestCase):
         self.assertIsNone(utils.get_osdetails())
 
 
+def host_scan(hostname, timestamp, osrelease):
+    "A minimal addhost input file."
+    return {
+        "name": hostname,
+        "timestamp": timestamp,
+        "values": {
+            "packages": [[{"name": "bash", "version": "5.2"}]],
+            "domain": "example.org",
+            "os": {"name": "Debian", "release": {"full": osrelease}},
+            "running-kernel": {"kernel-release": "6.12"},
+            "ipaddress": "192.0.2.1",
+            "ipaddress6": "2001:db8::1",
+        },
+    }
+
+
+class RedisFailureTests(CacheTestCase):
+    def setUp(self):
+        super().setUp()
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.dir = Path(tmp.name)
+        # addhost caches database rows across calls; tests roll them back.
+        for cache in (addhost.PACKAGES, addhost.CONTAINERS, addhost.CONFIGVALUES):
+            cache.clear()
+
+    def addhost(self, hostname, timestamp, osrelease):
+        path = self.dir / f"{hostname}-{timestamp[:10]}.json"
+        path.write_text(json.dumps(host_scan(hostname, timestamp, osrelease)))
+        call_command("addhost", str(path), stdout=mock.Mock(), stderr=mock.Mock())
+
+    def redis_down(self):
+        return mock.patch.object(
+            utils, "update_latest_hosts", side_effect=redis.ConnectionError("down")
+        )
+
+    def test_failed_write_is_not_trusted_and_retry_repairs_it(self):
+        self.addhost("a", "2026-10-01T12:00:00Z", "12")
+        self.warm()
+        a = Host.objects.get(hostname="a")
+        self.assertEqual(utils.get_osdetails(), {"Debian-12": [("a", a.id)]})
+
+        # The new scan is committed, but redis fails: import must still finish.
+        with self.redis_down():
+            self.addhost("a", "2026-10-02T12:00:00Z", "13")
+        self.assertTrue(HostDetails.objects.filter(cached=False).exists())
+        # Redis is back with its old data and ready flag: it must not be used.
+        self.assertIsNone(utils.get_osdetails())
+
+        # Retrying the same file skips the import but repairs the cache.
+        self.addhost("a", "2026-10-02T12:00:00Z", "13")
+        self.assertFalse(HostDetails.objects.filter(cached=False).exists())
+        self.assertEqual(utils.get_osdetails(), {"Debian-13": [("a", a.id)]})
+
+    def test_new_host_missed_by_redis_is_not_hidden(self):
+        self.addhost("a", "2026-10-01T12:00:00Z", "12")
+        self.warm()
+        with self.redis_down():
+            self.addhost("b", "2026-10-01T12:00:00Z", "12")
+        self.assertIsNone(utils.get_osdetails())
+        self.assertEqual(
+            sorted(h for h, _ in utils.osdetails_from_db()["Debian-12"]), ["a", "b"]
+        )
+
+    def test_rebuild_repairs_rows_it_read(self):
+        a = Host.objects.create(hostname="a")
+        HostDetails.objects.create(host=a, time=T0, osname="Debian", osrelease="12")
+        self.assertIsNone(utils.get_osdetails())
+        self.warm()
+        self.assertFalse(HostDetails.objects.filter(cached=False).exists())
+        self.assertEqual(utils.get_osdetails(), {"Debian-12": [("a", a.id)]})
+
+    def test_rows_committed_after_the_rebuild_read_stay_uncached(self):
+        a = Host.objects.create(hostname="a")
+        real_rows = utils.latest_host_rows
+
+        def rows_then_failed_import():
+            rows = list(real_rows())
+            # Committed after the rebuild read, and its redis write failed.
+            HostDetails.objects.create(host=a, time=T0, osname="Debian", osrelease="13")
+            return mock.Mock(iterator=lambda: iter(rows))
+
+        with mock.patch.object(utils, "latest_host_rows", rows_then_failed_import):
+            self.warm()
+        self.assertIsNone(utils.get_osdetails())
+        self.assertEqual(utils.sync_uncached_host_details(), 1)
+        self.assertEqual(utils.get_osdetails(), {"Debian-13": [("a", a.id)]})
+
+
 class WarmServerCacheTests(CacheTestCase):
     def test_rebuilds_from_database(self):
         a = Host.objects.create(hostname="a")
@@ -148,8 +239,9 @@ class WarmServerCacheTests(CacheTestCase):
         self.r.hset(utils.LEGACY_OSDETAILS_KEY, "Debian-11", "[]")
         self.r.hset("latesth:a", "time", 0)
 
-        # One query for all hosts and their latest details, whatever the history.
-        with self.assertNumQueries(1):
+        # Uncached ids, all hosts with their latest details, marking cached:
+        # a fixed number of queries, whatever the history.
+        with self.assertNumQueries(3):
             self.warm()
 
         expected = {
@@ -196,7 +288,8 @@ class IndexViewTests(CacheTestCase):
     def test_uses_cache(self):
         self.warm()
         self.r.hset(utils.LATEST_HOSTS_KEY, self.a.id, '["a", "Cached-1", 1, 0]')
-        with self.assertNumQueries(2):  # session + user, nothing for the hosts
+        # session + user + "any uncached rows?", nothing for the hosts
+        with self.assertNumQueries(3):
             response = self.client.get(self.URL)
         self.assertEqual(response.context["osdetails"], {"Cached-1": [("a", self.a.id)]})
 
