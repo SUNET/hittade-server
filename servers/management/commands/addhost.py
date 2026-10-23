@@ -3,6 +3,7 @@ import pathlib
 
 import orjson
 import pytz
+import redis
 from django.core.management.base import BaseCommand
 from django.utils.dateparse import parse_datetime
 
@@ -17,7 +18,7 @@ from servers.models import (
     HostPackages,
     Package,
 )
-from servers.utils import update_latest_hosts
+from servers.utils import osdetails_name, update_latest_hosts
 
 # DB cache for runtime
 PACKAGES = {}
@@ -252,6 +253,13 @@ class Command(BaseCommand):
             ipv6=ipv6,
             fail2ban=fail2ban,
         )
-        update_latest_hosts(hd.host.hostname, hd.id, hd.time)
+        try:
+            update_latest_hosts(
+                host.hostname, hd.id, hd.time, host.id, osdetails_name(osname, osrelease)
+            )
+        except redis.RedisError as e:
+            # The import itself succeeded; the /servers/ cache catches up when
+            # the app restarts (or run warmservercache).
+            self.stderr.write(self.style.WARNING(f"Redis cache not updated for {hostname}: {e}"))
 
         self.stdout.write(self.style.SUCCESS(f"Successfully added {hostname}"))

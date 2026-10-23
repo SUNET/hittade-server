@@ -32,6 +32,8 @@ class HostDetails(models.Model):
             models.Index(fields=["ipv4"]),
             models.Index(fields=["ipv6"]),
             models.Index(fields=["fail2ban"]),
+            # Latest details of a host (index page and warmservercache).
+            models.Index(fields=["host", "-time"], name="servers_hostdetails_latest"),
         ]
         ordering = ("-time",)
 
