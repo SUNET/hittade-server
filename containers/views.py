@@ -1,14 +1,14 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required, permission_required
-from django.db.models import F, OuterRef, Subquery
 from django.core.paginator import Paginator
-import datetime
-import pytz
+from django.db.models import F, OuterRef, Subquery
+from django.shortcuts import redirect, render
+
 from servers.models import HostContainers, HostContainersThrough
+
 from .forms import SearchForm
-from .models import ContainerPackage, ContainerTags, ContainerBase
+from .models import ContainerBase, ContainerPackage, ContainerTags
 from .utils import latest_containers
+
 # Create your views here.
 
 
@@ -37,7 +37,7 @@ def package(request, pk):
         request,
         "containers/package.html",
         {
-            "title": f"Package details",
+            "title": "Package details",
             "package": package, 
             "data": result,
         },
@@ -78,7 +78,7 @@ def cbase(request, cid):
         request, 
         "containers/container.html", 
         {
-            "title": f"Container details",
+            "title": "Container details",
             "cb": cb, 
             "tags": cb.tags.all(), 
             "packages": cb.packages.all(),
@@ -108,7 +108,7 @@ def containers(request):
         request, 
         "containers/containers.html", 
         {
-            "title": f"All container images",
+            "title": "All container images",
             "cbs": result, 
             "page": page,
         }
@@ -168,7 +168,7 @@ def search(request):
         request, 
         "containers/search.html", 
         {
-            "title": f"Container search",
+            "title": "Container search",
             "form": form, 
             "data": data, 
             "text": text,

@@ -1,5 +1,6 @@
 from django.shortcuts import render
 
+
 def start_page(request):
     template = "authenticated" if request.user.is_authenticated else "public"
 

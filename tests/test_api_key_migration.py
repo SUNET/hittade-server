@@ -1,4 +1,5 @@
 import hashlib
+from typing import ClassVar
 
 from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
@@ -15,8 +16,8 @@ class ApiKeyBackfillMigrationTests(TransactionTestCase):
     keys keep authenticating.
     """
 
-    migrate_from = [("api", "0001_initial")]
-    migrate_to = [("api", "0002_hash_api_keys")]
+    migrate_from: ClassVar[list[tuple[str, str]]] = [("api", "0001_initial")]
+    migrate_to: ClassVar[list[tuple[str, str]]] = [("api", "0002_hash_api_keys")]
 
     def setUp(self):
         executor = MigrationExecutor(connection)

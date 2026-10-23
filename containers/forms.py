@@ -1,6 +1,5 @@
 from django import forms
 
-
 search_choices = {"package": "Package", "container": "Container"}
 
 

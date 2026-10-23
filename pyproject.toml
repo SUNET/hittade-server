@@ -61,6 +61,10 @@ exclude = [
     "migrations",
 ]
 
+[tool.ruff.lint.per-file-ignores]
+# Django reads Meta options such as indexes as plain class attributes.
+"*/models.py" = ["RUF012"]
+
 [tool.ruff.lint.isort]
 # ./redis is the docker compose data dir, not the redis package.
 known-third-party = ["redis"]

@@ -6,15 +6,12 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import OuterRef, Subquery
 
 # Create your views here.
-from django.http import HttpResponse
 from django.shortcuts import redirect, render
-from django.views.decorators.csrf import csrf_exempt
 
 from containers.models import ContainerBase
 
 from .forms import SearchForm
 from .models import (
-    ConfigValues,
     Host,
     HostConfigs,
     HostContainers,

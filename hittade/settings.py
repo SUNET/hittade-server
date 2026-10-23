@@ -187,5 +187,5 @@ try:
         if not variable.startswith("__"):
             # Then we set it
             globals()[variable] = getattr(localsettings, variable)
-except:
+except ImportError:
     pass
