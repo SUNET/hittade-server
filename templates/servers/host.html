@@ -84,7 +84,13 @@
             <tbody>
                 {% for hc in containers %}
                 <tr>
-                    <td>{{ hc.container.image }}</td>
+                    <td>
+                        {% if hc.container.imageid in imported_cids and perms.containers.view_containerbase %}
+                        <a href="{% url 'containers:cbase' hc.container.imageid %}">{{ hc.container.image }}</a>
+                        {% else %}
+                        {{ hc.container.image }}
+                        {% endif %}
+                    </td>
                     <td>{{ hc.container.imageid }}</td>
                     <td>{{ hc.name }}</td>
                 </tr>
