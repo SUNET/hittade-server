@@ -2,7 +2,7 @@
 services:
   db:
     restart: always
-    image: postgres:14-alpine
+    image: postgres:18-alpine
     shm_size: 1024mb
     #networks:
       #- internal_network
@@ -13,13 +13,13 @@ services:
       retries: 5
       start_period: 80s 
     volumes:
-      - ./db:/var/lib/postgresql/data
+      - ./db:/var/lib/postgresql
     environment:
       - 'POSTGRES_HOST_AUTH_METHOD=trust'
 
   redis:
     restart: always
-    image: redis:7-alpine
+    image: redis:8-alpine
     #networks:
       #- internal_network
     healthcheck:
@@ -33,7 +33,7 @@ services:
 
   web:
     build: .
-    image: docker.sunet.se/hittade-server:v0.0.2
+    image: docker.sunet.se/hittade-server:v0.0.3
     depends_on:
       db:
         condition: service_healthy

@@ -1,14 +1,14 @@
 [project]
 name = "hittade-server"
 authors = [{name = "Kushal Das", email = "kushal@sunet.se"}]
-version = "0.0.2"
+version = "0.0.3"
 description = "Django web application to show the state of various hosts and containers"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.13"
 
 dependencies = [
-    "django==6.0.5",
+    "django==6.1.2",
     "django-types",
     "django-ninja",
     "django-extensions",
@@ -41,7 +41,7 @@ Home = "https://github.com/SUNET/hittade-server"
 # date which uv resolves against the local timezone) keeps `uv sync
 # --locked` builds reproducible across hosts and the UTC build container.
 # Bump deliberately when updating dependencies.
-exclude-newer = "2026-06-03T00:00:00Z"
+exclude-newer = "2026-10-09T00:00:00Z"
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "hittade.settings_test"
