@@ -18,14 +18,18 @@ redis_cache = {}
 # latest HostDetails of every host. Used by the /servers/ index page. Keyed by
 # id because Host.hostname is not unique.
 LATEST_HOSTS_KEY = "latesthosts"
-# Set only by a complete rebuild (warmservercache). Without it the hash may be
-# partial (e.g. redis was flushed and addhost added a single host), so readers
-# must use the database instead.
+# Set only by a complete rebuild (warmservercache), to the run_id of the redis
+# process it was built in. Without it the hash may be partial (e.g. redis was
+# flushed and addhost added a single host). With a different run_id, redis has
+# restarted since, possibly from a snapshot older than later imports. Either
+# way readers must use the database until the next rebuild.
 LATEST_HOSTS_READY_KEY = "latesthosts:ready"
 # A rebuild fills this hash and then renames it over LATEST_HOSTS_KEY.
 LATEST_HOSTS_BUILDING_KEY = "latesthosts:building"
-# Only one rebuild at a time.
+# Only one rebuild at a time; holds the run_id of the redis process it was taken
+# in, so a lock restored from a snapshot after a restart does not block rebuilds.
 LATEST_HOSTS_LOCK_KEY = "latesthosts:lock"
+LOCK_SECONDS = 3600
 # Marks the building hash as existing before any host is added to it.
 BUILDING_PLACEHOLDER = "__building__"
 # Old formats, only deleted now: osdetails -> list of hosts, and latesth:{hostname}.
@@ -57,7 +61,8 @@ return updated
 """
 )
 
-# Atomically replaces the live hash with the building one and marks it ready.
+# Atomically replaces the live hash with the building one and marks it ready
+# for the redis process (ARGV[2]) the rebuild started in.
 _PUBLISH = r.register_script(
     """
 redis.call("HDEL", KEYS[1], ARGV[1])
@@ -66,9 +71,32 @@ if redis.call("EXISTS", KEYS[1]) == 1 then
 else
     redis.call("DEL", KEYS[2])
 end
-redis.call("SET", KEYS[3], "1")
+redis.call("SET", KEYS[3], ARGV[2])
 """
 )
+
+# Takes the rebuild lock unless this redis process (ARGV[1]) already holds it.
+_LOCK = r.register_script(
+    """
+if redis.call("GET", KEYS[1]) == ARGV[1] then
+    return 0
+end
+redis.call("SET", KEYS[1], ARGV[1], "EX", ARGV[2])
+return 1
+"""
+)
+
+
+def _redis_run_id() -> str:
+    "Random id of the running redis process; it changes on every restart."
+    return r.info("server")["run_id"]
+
+
+def latest_hosts_ready() -> bool:
+    "Whether the cache was fully rebuilt in the current redis process."
+    run_id = _redis_run_id()
+    ready = r.get(LATEST_HOSTS_READY_KEY)
+    return ready is not None and ready.decode("utf-8") == run_id
 
 
 def osdetails_name(osname, osrelease) -> str:
@@ -107,19 +135,23 @@ def get_osdetails() -> dict[str, list[tuple[str, int]]] | None:
     """Returns osdetails -> [(hostname, host_id), ...] from the cache.
 
     Hosts are ordered newest first (by host id), like the database version.
-    Returns None when the cache is not complete: it was never fully rebuilt
-    (run warmservercache), or a HostDetails row is not in it yet (a redis
-    write failed or was interrupted; see sync_uncached_host_details()).
+    Returns None when the cache is not complete: it was not fully rebuilt in
+    the running redis process (run warmservercache), or a HostDetails row is not
+    in it yet (a redis write failed or was interrupted; see
+    sync_uncached_host_details()).
     """
     from .models import HostDetails
 
     if HostDetails.objects.filter(cached=False).exists():
         return None
+    # The run_id is read before and after, so a restart while reading (which
+    # could restore an old hash and ready flag) is never trusted.
+    run_id = _redis_run_id()
     pipe = r.pipeline(transaction=True)
-    pipe.exists(LATEST_HOSTS_READY_KEY)
+    pipe.get(LATEST_HOSTS_READY_KEY)
     pipe.hgetall(LATEST_HOSTS_KEY)
     ready, entries = pipe.execute()
-    if not ready:
+    if ready is None or ready.decode("utf-8") != run_id or _redis_run_id() != run_id:
         return None
     hosts = []
     for host_id, value in entries.items():
@@ -167,7 +199,10 @@ def rebuild_latest_hosts() -> int | None:
     new one is swapped in atomically. Returns the number of hosts, or None if
     another rebuild is running.
     """
-    if not r.set(LATEST_HOSTS_LOCK_KEY, "1", nx=True, ex=3600):
+    # Publish as ready for the process we start in: if redis restarts during
+    # the rebuild, the result is not trusted and the next rebuild redoes it.
+    run_id = _redis_run_id()
+    if not _LOCK(keys=[LATEST_HOSTS_LOCK_KEY], args=[run_id, LOCK_SECONDS], client=r):
         return None
     try:
         # Create the building hash *before* reading the database: an import
@@ -196,7 +231,7 @@ def rebuild_latest_hosts() -> int | None:
         pipe.execute()
         _PUBLISH(
             keys=[LATEST_HOSTS_BUILDING_KEY, LATEST_HOSTS_KEY, LATEST_HOSTS_READY_KEY],
-            args=[BUILDING_PLACEHOLDER],
+            args=[BUILDING_PLACEHOLDER, run_id],
             client=r,
         )
         _mark_cached(uncached)

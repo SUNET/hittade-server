@@ -21,9 +21,23 @@ T0 = datetime(2026, 10, 1, 12, 0, tzinfo=UTC)
 class CacheTestCase(TestCase):
     def setUp(self):
         self.r = fakeredis.FakeRedis()
-        patcher = mock.patch.object(utils, "r", self.r)
-        patcher.start()
-        self.addCleanup(patcher.stop)
+        # fakeredis has no INFO; simulate the redis process id ourselves.
+        self.run_id = "process-1"
+        for name, value in (("r", self.r), ("_redis_run_id", lambda: self.run_id)):
+            patcher = mock.patch.object(utils, name, value)
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
+    def snapshot(self):
+        "What redis would persist to disk now."
+        return {key: self.r.dump(key) for key in self.r.keys("*")}
+
+    def restart(self, snapshot):
+        "Restart redis as a new process, restoring the given (older) snapshot."
+        self.r.flushall()
+        for key, value in snapshot.items():
+            self.r.restore(key, 0, value)
+        self.run_id = f"process-{int(self.run_id.split('-')[1]) + 1}"
 
     def add_details(self, host, time, osname="Debian", osrelease="12"):
         "Adds a HostDetails row and updates the cache, like addhost does."
@@ -129,10 +143,17 @@ class CacheCompletenessTests(CacheTestCase):
             self.warm()
 
     def test_only_one_rebuild_at_a_time(self):
-        self.r.set(utils.LATEST_HOSTS_LOCK_KEY, "1")
+        self.r.set(utils.LATEST_HOSTS_LOCK_KEY, self.run_id)
         with self.assertRaises(CommandError):
             self.warm()
         self.assertIsNone(utils.get_osdetails())
+
+    def test_lock_restored_from_a_previous_redis_process_is_taken_over(self):
+        # Redis restarted during a rebuild and restored the lock with its data.
+        self.r.set(utils.LATEST_HOSTS_LOCK_KEY, "process-0")
+        self.warm()
+        self.assertEqual(utils.get_osdetails(), {})
+        self.assertFalse(self.r.exists(utils.LATEST_HOSTS_LOCK_KEY))
 
 
 def host_scan(hostname, timestamp, osrelease):
@@ -151,7 +172,7 @@ def host_scan(hostname, timestamp, osrelease):
     }
 
 
-class RedisFailureTests(CacheTestCase):
+class AddhostTestCase(CacheTestCase):
     def setUp(self):
         super().setUp()
         tmp = tempfile.TemporaryDirectory()
@@ -171,6 +192,8 @@ class RedisFailureTests(CacheTestCase):
             utils, "update_latest_hosts", side_effect=redis.ConnectionError("down")
         )
 
+
+class RedisFailureTests(AddhostTestCase):
     def test_failed_write_is_not_trusted_and_retry_repairs_it(self):
         self.addhost("a", "2026-10-01T12:00:00Z", "12")
         self.warm()
@@ -222,6 +245,67 @@ class RedisFailureTests(CacheTestCase):
         self.assertIsNone(utils.get_osdetails())
         self.assertEqual(utils.sync_uncached_host_details(), 1)
         self.assertEqual(utils.get_osdetails(), {"Debian-13": [("a", a.id)]})
+
+
+class RedisRestartTests(AddhostTestCase):
+    def test_restored_older_ready_cache_is_rejected_and_retry_repairs_it(self):
+        self.addhost("a", "2026-10-01T12:00:00Z", "12")
+        a = Host.objects.get(hostname="a")
+        self.assertEqual(utils.get_osdetails(), {"Debian-12": [("a", a.id)]})
+        # Redis saves a snapshot, then a successful import: the database marks
+        # the new row as cached.
+        snapshot = self.snapshot()
+        self.addhost("a", "2026-10-02T12:00:00Z", "13")
+        self.assertEqual(utils.get_osdetails(), {"Debian-13": [("a", a.id)]})
+        self.assertFalse(HostDetails.objects.filter(cached=False).exists())
+
+        # Redis restarts from the older snapshot, ready flag included.
+        self.restart(snapshot)
+        self.assertEqual(
+            json.loads(self.r.hget(utils.LATEST_HOSTS_KEY, a.id))[1], "Debian-12"
+        )
+        self.assertIsNone(utils.get_osdetails())
+        self.assertFalse(utils.latest_hosts_ready())
+
+        # Retrying the same file (all skipped) rebuilds the cache.
+        self.addhost("a", "2026-10-02T12:00:00Z", "13")
+        self.assertEqual(utils.get_osdetails(), {"Debian-13": [("a", a.id)]})
+
+    def test_index_uses_database_after_restart(self):
+        self.addhost("a", "2026-10-01T12:00:00Z", "12")
+        snapshot = self.snapshot()
+        self.addhost("b", "2026-10-01T12:00:00Z", "12")
+        self.restart(snapshot)
+
+        user = User.objects.create_superuser("admin", password="pw")
+        self.client.force_login(user)
+        response = self.client.get("/servers/")
+        self.assertEqual(
+            sorted(h for h, _ in response.context["osdetails"]["Debian-12"]), ["a", "b"]
+        )
+
+    def test_restart_while_reading_is_not_trusted(self):
+        self.warm()
+        self.assertEqual(utils.get_osdetails(), {})
+        # Same ready flag, but the process changed between the two run_id reads.
+        with mock.patch.object(utils, "_redis_run_id", side_effect=["process-1", "process-2"]):
+            self.assertIsNone(utils.get_osdetails())
+
+    def test_restart_during_rebuild_is_not_trusted(self):
+        a = Host.objects.create(hostname="a")
+        HostDetails.objects.create(host=a, time=T0, osname="Debian", osrelease="12")
+        real_rows = utils.latest_host_rows
+
+        def rows_then_restart():
+            rows = list(real_rows())
+            self.restart(self.snapshot())
+            return mock.Mock(iterator=lambda: iter(rows))
+
+        with mock.patch.object(utils, "latest_host_rows", rows_then_restart):
+            self.warm()
+        self.assertIsNone(utils.get_osdetails())
+        self.warm()
+        self.assertEqual(utils.get_osdetails(), {"Debian-12": [("a", a.id)]})
 
 
 class WarmServerCacheTests(CacheTestCase):

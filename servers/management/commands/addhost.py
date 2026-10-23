@@ -18,7 +18,12 @@ from servers.models import (
     HostPackages,
     Package,
 )
-from servers.utils import cache_host_details, sync_uncached_host_details
+from servers.utils import (
+    cache_host_details,
+    latest_hosts_ready,
+    rebuild_latest_hosts,
+    sync_uncached_host_details,
+)
 
 # DB cache for runtime
 PACKAGES = {}
@@ -56,13 +61,15 @@ class Command(BaseCommand):
         self.sync_cache()
 
     def sync_cache(self):
-        """Repairs cache writes that failed earlier (this run or before).
+        """Repairs cache writes that failed earlier (this run or before), and
+        rebuilds the cache if redis lost it or restarted since the last rebuild.
 
         Runs even when every file was skipped as already imported, so retrying
         an import fixes the cache once redis is back.
         """
         try:
             count = sync_uncached_host_details()
+            rebuilt = None if latest_hosts_ready() else rebuild_latest_hosts()
         except redis.RedisError as e:
             self.stderr.write(
                 self.style.WARNING(
@@ -73,6 +80,8 @@ class Command(BaseCommand):
             return
         if count:
             self.stdout.write(self.style.SUCCESS(f"Synced {count} host details to the cache."))
+        if rebuilt is not None:
+            self.stdout.write(self.style.SUCCESS(f"Rebuilt the cache for {rebuilt} hosts."))
 
     def add_host_details(self, filename):
         "Parses and stores data on database."
