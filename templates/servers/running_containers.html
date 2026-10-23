@@ -1,0 +1,48 @@
+{% extends "dashboard.html" %}
+
+{% block content %}
+    <div class="ht-container -narrow">
+        <form action="{% url 'servers:running_containers' %}" method="get">
+            <div class="ht-search-bar">
+                <input type="text" class="text" id="id_search" name="search" placeholder="Package name, optionally with a version" aria-label="Search packages in running containers" value="{{ text }}">
+            </div>
+        </form>
+    </div>
+    <div class="ht-container">
+        {% if rows %}
+        <div class="ht-scrollable">
+            <table class="ht-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Host</th>
+                        <th scope="col">Container name</th>
+                        <th scope="col">Container image</th>
+                        <th scope="col">Package name</th>
+                        <th scope="col">Package version</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                    <tr>
+                        <td><a href="{% url 'servers:host' row.host.id %}">{{ row.host.hostname }}</a></td>
+                        <td>{{ row.name }}</td>
+                        <td><a href="{% url 'containers:cbase' row.imageid %}">{{ row.image }}</a></td>
+                        <td>{{ row.package }}</td>
+                        <td>{{ row.version }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% elif text %}
+            <p class="ht-text">
+                No running container has a package matching "{{ text }}".
+            </p>
+        {% endif %}
+        {% if text and unknown_containers %}
+            <p class="ht-text">
+                {{ unknown_containers }} running container{{ unknown_containers|pluralize }} on {{ unknown_hosts }} host{{ unknown_hosts|pluralize }} {{ unknown_containers|pluralize:"has,have" }} no imported image, so {{ unknown_containers|pluralize:"it was,they were" }} not searched.
+            </p>
+        {% endif %}
+    </div>
+{% endblock %}

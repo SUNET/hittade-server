@@ -22,7 +22,12 @@ from .models import (
     HostPackages,
     Package,
 )
-from .utils import generate_host_configurations_dict, get_osdetails, osdetails_from_db
+from .utils import (
+    generate_host_configurations_dict,
+    get_osdetails,
+    osdetails_from_db,
+    running_containers_with_package,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -144,6 +149,33 @@ def search(request):
             "data": data,
             "text": text,
             "stype": stype,
+        },
+    )
+
+
+@login_required
+@permission_required(
+    ["servers.view_host", "containers.view_containerbase"], raise_exception=True
+)
+def running_containers(request):
+    "Hosts with a running container that has the searched package."
+    text = request.GET.get("search", "").strip()
+    rows = []
+    unknown = (0, 0)
+    if text:
+        # "openssl" matches the package name, "openssl 3.0" the version too.
+        words = text.split()
+        version = words[1] if len(words) > 1 else ""
+        rows, unknown = running_containers_with_package(words[0], version)
+    return render(
+        request,
+        "servers/running_containers.html",
+        {
+            "title": "Running containers",
+            "text": text,
+            "rows": rows,
+            "unknown_containers": unknown[0],
+            "unknown_hosts": unknown[1],
         },
     )
 

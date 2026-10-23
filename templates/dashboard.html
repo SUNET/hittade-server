@@ -32,6 +32,7 @@
                                 <li><a href="/containers/search" class="sublink" aria-label="Search through all containers">Search containers</a></li>
                             </ul>
                         </li>
+                        <li><a class="link -search" href="{% url 'servers:running_containers' %}" aria-label="Search packages in running containers">Running containers</a></li>
                     </ul>
                 </nav>
                 <form class="logout" method="POST" action="{% url 'logout' %}" aria-label="Logout form">
