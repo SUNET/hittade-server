@@ -1,7 +1,7 @@
 [project]
 name = "hittade-server"
 authors = [{name = "Kushal Das", email = "kushal@sunet.se"}]
-version = "0.0.3"
+version = "0.1.0"
 description = "Django web application to show the state of various hosts and containers"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -60,6 +60,12 @@ exclude = [
     ".venv",
     "migrations",
 ]
+
+[tool.ruff.lint.per-file-ignores]
+# Django reads Meta options such as indexes as plain class attributes.
+"*/models.py" = ["RUF012"]
+# The test settings extend the normal settings with a wildcard import.
+"hittade/settings_test.py" = ["F403"]
 
 [tool.ruff.lint.isort]
 # ./redis is the docker compose data dir, not the redis package.

@@ -4,7 +4,7 @@ Inherits everything from the normal settings but swaps in a throwaway
 in-memory SQLite database so tests run anywhere without a Postgres server.
 """
 
-from .settings import *  # noqa: F401,F403
+from .settings import *
 
 DATABASES = {
     "default": {

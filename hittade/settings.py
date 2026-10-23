@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import importlib
 import os
 from pathlib import Path
 
@@ -178,14 +179,18 @@ REDIS = {
 
 
 # If we have a localsettings.py file, import everything from there and
-# use.
+# use. Only a missing localsettings.py is ignored; errors raised inside it
+# (including its own failed imports) stop the startup.
 try:
-    from . import localsettings
+    localsettings = importlib.import_module(".localsettings", __package__)
+except ModuleNotFoundError as e:
+    if e.name != f"{__package__}.localsettings":
+        raise
+    localsettings = None
 
+if localsettings is not None:
     # now see if we need to override any settings
     for variable in dir(localsettings):
         if not variable.startswith("__"):
             # Then we set it
             globals()[variable] = getattr(localsettings, variable)
-except:
-    pass

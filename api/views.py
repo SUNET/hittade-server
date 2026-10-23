@@ -1,14 +1,11 @@
 from datetime import datetime
-from pprint import pprint
-from typing import List, Optional
 
 from django.utils import timezone
 from ninja import NinjaAPI, Schema
 from ninja.pagination import LimitOffsetPagination, paginate
 from ninja.security import APIKeyHeader
 
-from servers.models import (Host, HostConfigs, HostContainers, HostDetails,
-                            HostPackages)
+from servers.models import Host, HostConfigs, HostContainers, HostDetails, HostPackages
 
 from .models import APIKey
 
@@ -37,13 +34,13 @@ class HostSchema(Schema):
 
 class HostDetailsSchema(Schema):
     time: datetime
-    domain: Optional[str]
+    domain: str | None
     osname: str
     osrelease: str
     rkr: str
     cosmosrepourl: str
-    ipv4: Optional[str]
-    ipv6: Optional[str]
+    ipv4: str | None
+    ipv6: str | None
     fail2ban: bool
 
 
@@ -67,18 +64,18 @@ class HostConfigurationSchema(Schema):
 class CombinedHostSchema(Schema):
     host: HostSchema
     details: HostDetailsSchema
-    packages: List[PackageSchema]
-    containers: List[ServerContainerSchema]
-    configs: List[HostConfigurationSchema]
+    packages: list[PackageSchema]
+    containers: list[ServerContainerSchema]
+    configs: list[HostConfigurationSchema]
 
 
-@api.get("/hosts", response=List[HostSchema])
+@api.get("/hosts", response=list[HostSchema])
 @paginate(LimitOffsetPagination)
 def list_hosts(request):
     return Host.objects.all().order_by("hostname")
 
 
-@api.get("/host/{host_id}/config", response=List[HostConfigurationSchema])
+@api.get("/host/{host_id}/config", response=list[HostConfigurationSchema])
 def get_host_config(request, host_id):
     """Returns only the host configuration entries."""
     host = Host.objects.get(pk=host_id)
@@ -99,7 +96,6 @@ def host_details(request, host_id):
     except IndexError:
         host_configs = []
     host_containers = HostContainers.objects.filter(host=host).order_by("-time")[0]
-    cdetails = host_containers.hostcontainersthrough_set.all().prefetch_related()
     details = HostDetails.objects.filter(host=host).order_by("-time")[0]
     if host_configs:
         cd = [c for c in host_configs.configs.all()]

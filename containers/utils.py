@@ -1,6 +1,7 @@
-from django.conf import settings
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 import redis
+from django.conf import settings
 
 redis_conf = settings.REDIS
 
@@ -8,9 +9,8 @@ r = redis.Redis(host=redis_conf["host"], port=redis_conf["port"], db=redis_conf[
 
 def update_latest_containers(cname: str, db_id:int, ctime: datetime) -> None:
     "Updates the latest container entry"
-    global r
     key = f"latest:{cname}"
-    time_value = ctime.replace(tzinfo=timezone.utc).timestamp()
+    time_value = ctime.replace(tzinfo=UTC).timestamp()
     current_latest = r.hget(key, "time")
     if time_value > float(current_latest or 0):
         r.hset(key, "time", time_value)
@@ -18,7 +18,6 @@ def update_latest_containers(cname: str, db_id:int, ctime: datetime) -> None:
 
 def latest_containers() -> list:
     "Get the IDs of the latest containers"
-    global r
     keys = r.keys("latest:*")
     results = []
     for key in keys:
@@ -29,7 +28,6 @@ def latest_containers() -> list:
 
 def delete_all_container_cache():
     "Deletes the warm cache."
-    global r
     keys = r.keys("latest:*")
     for key in keys:
         r.delete(key)

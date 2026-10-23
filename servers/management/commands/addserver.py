@@ -1,7 +1,8 @@
 from django.core.management.base import BaseCommand
-from servers.models import Host, Package, HostDetails
-from lib4sbom.parser import SBOMParser
 from django.utils.dateparse import parse_datetime
+from lib4sbom.parser import SBOMParser
+
+from servers.models import Host, HostDetails, Package
 
 
 class Command(BaseCommand):

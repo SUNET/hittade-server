@@ -1,8 +1,7 @@
+
 from django.core.management.base import BaseCommand
-from django.utils.dateparse import parse_datetime
-from containers.models import ContainerTags, ContainerBase, ContainerPackage
-from datetime import datetime
-from pprint import pprint
+
+from containers.models import ContainerBase
 from containers.utils import *
 
 

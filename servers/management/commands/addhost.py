@@ -41,14 +41,15 @@ class Command(BaseCommand):
         filename = options["filename"]
         if pathlib.Path(filename).is_dir():
             # We have a directory of files.
-            for filename in pathlib.Path(filename).iterdir():
-                if filename.suffix == ".json":
+            for path in pathlib.Path(filename).iterdir():
+                if path.suffix == ".json":
                     try:
-                        self.add_host_details(str(filename))
-                    except Exception as e:
+                        self.add_host_details(str(path))
+                    # One bad file must not stop the import of the others.
+                    except Exception as e:  # noqa: BLE001
                         self.stderr.write(
                             self.style.ERROR(
-                                f"Error processing file: {filename}: {str(e)}"
+                                f"Error processing file: {path}: {e!s}"
                             )
                         )
         else:
@@ -56,10 +57,6 @@ class Command(BaseCommand):
 
     def add_host_details(self, filename):
         "Parses and stores data on database."
-        # These variables to be used for speedup
-        global PACKAGES
-        global CONTAINERS
-
         # Using orjson to faster parsing of the JSON data
         with open(filename, "r") as fobj:
             file_text = fobj.read()
@@ -70,9 +67,8 @@ class Command(BaseCommand):
             if "name" in data:
                 hostname = data["name"]
             else:
-                if "ec2_metadata" in data:
-                    if "hostname" in data["ec2_metadata"]:
-                        hostname = data["ec2_metadata"]["hostname"]
+                if "ec2_metadata" in data and "hostname" in data["ec2_metadata"]:
+                    hostname = data["ec2_metadata"]["hostname"]
                 if not hostname:
                     # means no ec2_metadata also avaiable
                     # we can fallback to fqdn
@@ -89,8 +85,8 @@ class Command(BaseCommand):
             try:
                 created_str = data["timestamp"]
                 created_at = parse_datetime(created_str)
-            except:
-                created_at = datetime.datetime.now(datetime.timezone.utc).replace(
+            except (KeyError, TypeError, ValueError):
+                created_at = datetime.datetime.now(datetime.UTC).replace(
                     tzinfo=pytz.utc
                 )
             system_packages = values["packages"][0]
@@ -151,9 +147,9 @@ class Command(BaseCommand):
                     )
                     PACKAGES[key_text] = package
                 ps.append(package)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 self.stderr.write(
-                    self.style.ERROR(f"Error adding package {p} with error: {str(e)}")
+                    self.style.ERROR(f"Error adding package {p} with error: {e!s}")
                 )
                 continue
 
@@ -180,10 +176,10 @@ class Command(BaseCommand):
                         CONFIGVALUES[key_text] = configvalue
 
                     cs.append(configvalue)
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     self.stderr.write(
                         self.style.ERROR(
-                            f"Error adding configuration {k} with {v} with error: {str(e)}"
+                            f"Error adding configuration {k} with {v} with error: {e!s}"
                         )
                     )
                     continue
@@ -213,10 +209,10 @@ class Command(BaseCommand):
                             ctype="hiera_meta", name=key_text, value=name
                         )
                         cs.append(configvalue)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 self.stderr.write(
                     self.style.ERROR(
-                        f"Error adding configuration {key_text} with {v} with error: {str(e)}"
+                        f"Error adding configuration {key_text} with {v} with error: {e!s}"
                     )
                 )
 

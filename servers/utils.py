@@ -1,7 +1,7 @@
 import json
 import uuid
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import redis
 from django.conf import settings
@@ -63,7 +63,7 @@ def _timestamp(ctime: datetime | None) -> float:
     if ctime is None:
         return 0.0
     if ctime.tzinfo is None:
-        ctime = ctime.replace(tzinfo=timezone.utc)
+        ctime = ctime.replace(tzinfo=UTC)
     return ctime.timestamp()
 
 
