@@ -46,6 +46,35 @@
             </div>
 
         </div>
+        {% if perms.servers.view_host %}
+        <div class="ht-container">
+            <h3 class="ht-heading -m">Running on hosts: <span class="ht-badge -info">{{ running|length }}</span></h3>
+            <div class="ht-scrollable">
+                <table class="ht-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Host</th>
+                            <th scope="col">Container name</th>
+                            <th scope="col">Seen at</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for hc in running %}
+                        <tr>
+                            <td><a href="{% url 'servers:host' hc.hc.host.id %}">{{ hc.hc.host.hostname }}</a></td>
+                            <td>{{ hc.name }}</td>
+                            <td>{{ hc.hc.time|date:"r" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3">Not running on any host</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
         <div class="ht-container">
             <p class="ht-heading -m">Package list</p>
             <div class="ht-scrollable">

@@ -10,6 +10,8 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
 
+from containers.models import ContainerBase
+
 from .forms import SearchForm
 from .models import (
     ConfigValues,
@@ -65,7 +67,13 @@ def host(request, pk):
     except IndexError:
         host_configs = []
     host_containers = HostContainers.objects.filter(host=host).order_by("-time")[0]
-    cdetails = host_containers.hostcontainersthrough_set.all().prefetch_related()
+    cdetails = host_containers.hostcontainersthrough_set.select_related("container")
+    # Image IDs of the running containers that were imported as container images.
+    imported_cids = set(
+        ContainerBase.objects.filter(
+            cid__in={hc.container.imageid for hc in cdetails}
+        ).values_list("cid", flat=True)
+    )
     details = HostDetails.objects.filter(host=host).order_by("-time")[0]
 
     if host_configs:
@@ -81,6 +89,7 @@ def host(request, pk):
             "host": host,
             "packages": host_packages.packages.all(),
             "containers": cdetails,
+            "imported_cids": imported_cids,
             "details": details,
             "configurations": generate_host_configurations_dict(config_from_db),
         },

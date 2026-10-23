@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required, permission_required
-from django.db.models import OuterRef, Subquery
+from django.db.models import F, OuterRef, Subquery
 from django.core.paginator import Paginator
 import datetime
 import pytz
+from servers.models import HostContainers, HostContainersThrough
 from .forms import SearchForm
 from .models import ContainerPackage, ContainerTags, ContainerBase
 from .utils import latest_containers
@@ -47,11 +48,32 @@ def package(request, pk):
 @permission_required("containers.view_containerbase", raise_exception=True)
 def cbase(request, cid):
     "Shows details of a specific container image based on it's container ID."
-    try:
-        cb = ContainerBase.objects.filter(cid=cid)[0]
-    except ContainerBase.DoesNotExist:
-        return render(request, "containers/container.html", {"error": "Container not found."})
-    
+    cb = ContainerBase.objects.filter(cid=cid).first()
+    if cb is None:
+        return render(
+            request,
+            "containers/container.html",
+            {"error": "Container not found."},
+            status=404,
+        )
+
+    # Hosts whose latest docker ps shows a container running this image, only
+    # for users who can see the servers.
+    running = []
+    if request.user.has_perm("servers.view_host"):
+        latest_hc = (
+            HostContainers.objects.filter(host=OuterRef("hc__host"))
+            .order_by("-time")
+            .values("id")[:1]
+        )
+        running = (
+            HostContainersThrough.objects.filter(container__imageid=cid)
+            .annotate(latest_hc=Subquery(latest_hc))
+            .filter(hc_id=F("latest_hc"))
+            .select_related("hc__host")
+            .order_by("hc__host__hostname", "name")
+        )
+
     return render(
         request, 
         "containers/container.html", 
@@ -60,6 +82,7 @@ def cbase(request, cid):
             "cb": cb, 
             "tags": cb.tags.all(), 
             "packages": cb.packages.all(),
+            "running": running,
         }
     )
 
