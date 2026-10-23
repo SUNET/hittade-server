@@ -180,3 +180,69 @@ def generate_host_configurations_dict(input: list) -> dict:
         configurations[configuration.ctype][configuration.name] = configuration.value
 
     return configurations
+
+def running_containers_with_package(name: str, version: str = ""):
+    """Running containers whose image has a package matching name (and version).
+
+    Only the latest docker ps scan of every host counts, and a container is
+    matched through its image ID, which is ContainerBase.cid of an imported
+    image. Returns (rows, unknown): rows is a list of dicts with host, name (of
+    the container), image, imageid, package and version, sorted by host, and
+    unknown is (containers, hosts), the counts of running
+    containers whose image was never imported, so their packages are unknown.
+    """
+    from containers.models import ContainerBase, ContainerPackage
+
+    from .models import Host, HostContainers, HostContainersThrough
+
+    # The latest docker ps scan of every host, looked up once per host.
+    latest_hc_ids = Host.objects.annotate(
+        latest_hc=Subquery(
+            HostContainers.objects.filter(host=OuterRef("pk"))
+            .order_by("-time")
+            .values("id")[:1]
+        )
+    ).values("latest_hc")
+    running = list(
+        HostContainersThrough.objects.filter(hc_id__in=latest_hc_ids)
+        .select_related("hc__host", "container")
+        .order_by("hc__host__hostname", "name")
+    )
+    imageids = {hc.container.imageid for hc in running}
+    imported = set(
+        ContainerBase.objects.filter(cid__in=imageids).values_list("cid", flat=True)
+    )
+
+    packages = ContainerPackage.objects.filter(name__icontains=name)
+    if version:
+        packages = packages.filter(version__icontains=version)
+    # imageid -> matching (name, version) of the packages in that image.
+    matches = defaultdict(set)
+    for cid, pname, pversion in ContainerBase.packages.through.objects.filter(
+        containerbase__cid__in=imported, containerpackage__in=packages
+    ).values_list(
+        "containerbase__cid", "containerpackage__name", "containerpackage__version"
+    ):
+        matches[cid].add((pname, pversion))
+
+    rows = []
+    unknown_hosts = set()
+    unknown_containers = 0
+    for hc in running:
+        imageid = hc.container.imageid
+        if imageid not in imported:
+            unknown_containers += 1
+            unknown_hosts.add(hc.hc.host_id)
+            continue
+        for pname, pversion in sorted(matches[imageid]):
+            rows.append(
+                {
+                    "host": hc.hc.host,
+                    "name": hc.name,
+                    "image": hc.container.image,
+                    "imageid": imageid,
+                    "package": pname,
+                    "version": pversion,
+                }
+            )
+    return rows, (unknown_containers, len(unknown_hosts))
