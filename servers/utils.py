@@ -14,8 +14,9 @@ r = redis.Redis(host=redis_conf["host"], port=redis_conf["port"], db=redis_conf[
 redis_cache = {}
 
 
-# Hash of hostname -> JSON [host_id, osdetails, hostdetails_id, time] for the
-# latest HostDetails of every host. Used by the /servers/ index page.
+# Hash of host id -> JSON [hostname, osdetails, hostdetails_id, time] for the
+# latest HostDetails of every host. Used by the /servers/ index page. Keyed by
+# id because Host.hostname is not unique.
 LATEST_HOSTS_KEY = "latesthosts"
 # Set only by a complete rebuild (warmservercache). Without it the hash may be
 # partial (e.g. redis was flushed and addhost added a single host), so readers
@@ -33,19 +34,19 @@ LEGACY_LATEST_PATTERN = "latesth:*"
 
 # The scripts are registered once; every call passes client= so they always
 # run on the current module-level client.
-# Sets KEYS[n][ARGV[1]] = ARGV[3] where ARGV[2] (the time) is newer than the
+# Sets KEYS[n][ARGV[1]] (the host id) = ARGV[3] where ARGV[2] (the time) is newer than the
 # stored entry. KEYS[1] is always updated, the others only while they exist,
 # so imports during a rebuild also land in the building hash. Returns 1 if
 # KEYS[1] was updated.
 _SET_IF_NEWER = r.register_script(
     """
-local hostname, time, value = ARGV[1], tonumber(ARGV[2]), ARGV[3]
+local field, time, value = ARGV[1], tonumber(ARGV[2]), ARGV[3]
 local updated = 0
 for i, key in ipairs(KEYS) do
     if i == 1 or redis.call("EXISTS", key) == 1 then
-        local current = redis.call("HGET", key, hostname)
+        local current = redis.call("HGET", key, field)
         if not current or time > tonumber(cjson.decode(current)[4]) then
-            redis.call("HSET", key, hostname, value)
+            redis.call("HSET", key, field, value)
             if i == 1 then
                 updated = 1
             end
@@ -85,8 +86,8 @@ def _timestamp(ctime: datetime | None) -> float:
     return ctime.timestamp()
 
 
-def _entry(host_id: int, osdetails: str, db_id: int | None, time_value: float) -> str:
-    return json.dumps([host_id, osdetails, db_id, time_value])
+def _entry(hostname: str, osdetails: str, db_id: int | None, time_value: float) -> str:
+    return json.dumps([hostname, osdetails, db_id, time_value])
 
 
 def update_latest_hosts(
@@ -96,7 +97,7 @@ def update_latest_hosts(
     time_value = _timestamp(ctime)
     updated = _SET_IF_NEWER(
         keys=[LATEST_HOSTS_KEY, LATEST_HOSTS_BUILDING_KEY],
-        args=[hostname, time_value, _entry(host_id, osdetails, db_id, time_value)],
+        args=[host_id, time_value, _entry(hostname, osdetails, db_id, time_value)],
         client=r,
     )
     return bool(updated)
@@ -115,9 +116,9 @@ def get_osdetails() -> dict[str, list[tuple[str, int]]] | None:
     if not ready:
         return None
     hosts = []
-    for hostname, value in entries.items():
-        host_id, osdetails, _, _ = json.loads(value)
-        hosts.append((host_id, hostname.decode("utf-8"), osdetails))
+    for host_id, value in entries.items():
+        hostname, osdetails, _, _ = json.loads(value)
+        hosts.append((int(host_id), hostname, osdetails))
     data: dict[str, list[tuple[str, int]]] = defaultdict(list)
     for host_id, hostname, osdetails in sorted(hosts, reverse=True):
         data[osdetails].append((hostname, host_id))
@@ -174,9 +175,9 @@ def rebuild_latest_hosts() -> int | None:
             _SET_IF_NEWER(
                 keys=[LATEST_HOSTS_BUILDING_KEY],
                 args=[
-                    hostname,
+                    host_id,
                     time_value,
-                    _entry(host_id, osdetails_name(osname, osrelease), db_id, time_value),
+                    _entry(hostname, osdetails_name(osname, osrelease), db_id, time_value),
                 ],
                 client=pipe,
             )

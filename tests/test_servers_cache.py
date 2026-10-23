@@ -144,7 +144,7 @@ class WarmServerCacheTests(CacheTestCase):
         )
         HostDetails.objects.create(host=b, time=T0, osname="Ubuntu", osrelease="24.04")
         # Stale entries from before: a deleted host and the old cache formats.
-        self.r.hset(utils.LATEST_HOSTS_KEY, "gone", '[999, "Debian-11", 1, 0]')
+        self.r.hset(utils.LATEST_HOSTS_KEY, 999, '["gone", "Debian-11", 1, 0]')
         self.r.hset(utils.LEGACY_OSDETAILS_KEY, "Debian-11", "[]")
         self.r.hset("latesth:a", "time", 0)
 
@@ -163,6 +163,18 @@ class WarmServerCacheTests(CacheTestCase):
         self.assertFalse(self.r.exists(utils.LEGACY_OSDETAILS_KEY, "latesth:a"))
         self.assertFalse(self.r.exists(utils.LATEST_HOSTS_BUILDING_KEY))
         self.assertFalse(self.r.exists(utils.LATEST_HOSTS_LOCK_KEY))
+
+    def test_hosts_sharing_a_hostname_are_kept_apart(self):
+        # Host.hostname is not unique, so the cache must not merge these.
+        old = Host.objects.create(hostname="dup")
+        new = Host.objects.create(hostname="dup")
+        HostDetails.objects.create(host=old, time=T0, osname="Debian", osrelease="12")
+        self.warm()
+        self.add_details(new, T0 - timedelta(days=1), osrelease="13")
+
+        expected = {"Debian-13": [("dup", new.id)], "Debian-12": [("dup", old.id)]}
+        self.assertEqual(utils.get_osdetails(), expected)
+        self.assertEqual(utils.osdetails_from_db(), expected)
 
     def test_host_without_details_is_replaced_by_its_first_scan(self):
         empty = Host.objects.create(hostname="empty")
@@ -183,7 +195,7 @@ class IndexViewTests(CacheTestCase):
 
     def test_uses_cache(self):
         self.warm()
-        self.r.hset(utils.LATEST_HOSTS_KEY, "a", f'[{self.a.id}, "Cached-1", 1, 0]')
+        self.r.hset(utils.LATEST_HOSTS_KEY, self.a.id, '["a", "Cached-1", 1, 0]')
         with self.assertNumQueries(2):  # session + user, nothing for the hosts
             response = self.client.get(self.URL)
         self.assertEqual(response.context["osdetails"], {"Cached-1": [("a", self.a.id)]})
