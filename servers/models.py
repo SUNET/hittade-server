@@ -24,10 +24,6 @@ class HostDetails(models.Model):
     ipv4 = models.CharField(max_length=255, null=True, blank=True)
     ipv6 = models.CharField(max_length=300, null=True, blank=True)
     fail2ban = models.BooleanField(default=False)
-    # True once this row is in the redis latest hosts cache. Set after the
-    # redis write, so a failed or interrupted write stays visible here and the
-    # /servers/ index uses the database until it is repaired.
-    cached = models.BooleanField(default=False)
 
     class Meta:
         indexes = [
@@ -38,10 +34,6 @@ class HostDetails(models.Model):
             models.Index(fields=["fail2ban"]),
             # Latest details of a host (index page and warmservercache).
             models.Index(fields=["host", "-time"], name="servers_hostdetails_latest"),
-            # Rows still missing from the redis cache (normally none).
-            models.Index(
-                fields=["id"], condition=models.Q(cached=False), name="servers_hostdetails_uncached"
-            ),
         ]
         ordering = ("-time",)
 

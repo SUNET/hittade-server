@@ -156,8 +156,8 @@ def index(request):
         logger.warning("Redis unavailable, building the servers index from the database")
         osdetails = None
     if osdetails is None:
-        # Incomplete or unavailable cache: use the database until
-        # `warmservercache` has rebuilt it.
+        # No cache yet (or redis was flushed/is down): use the database until
+        # the next app restart rebuilds it (or run `warmservercache`).
         osdetails = osdetails_from_db()
 
     return render(

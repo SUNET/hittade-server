@@ -18,12 +18,7 @@ from servers.models import (
     HostPackages,
     Package,
 )
-from servers.utils import (
-    cache_host_details,
-    latest_hosts_ready,
-    rebuild_latest_hosts,
-    sync_uncached_host_details,
-)
+from servers.utils import osdetails_name, update_latest_hosts
 
 # DB cache for runtime
 PACKAGES = {}
@@ -58,30 +53,6 @@ class Command(BaseCommand):
                         )
         else:
             self.add_host_details(filename)
-        self.sync_cache()
-
-    def sync_cache(self):
-        """Repairs cache writes that failed earlier (this run or before), and
-        rebuilds the cache if redis lost it or restarted since the last rebuild.
-
-        Runs even when every file was skipped as already imported, so retrying
-        an import fixes the cache once redis is back.
-        """
-        try:
-            count = sync_uncached_host_details()
-            rebuilt = None if latest_hosts_ready() else rebuild_latest_hosts()
-        except redis.RedisError as e:
-            self.stderr.write(
-                self.style.WARNING(
-                    f"Redis cache not updated ({e}); /servers/ uses the database "
-                    "until addhost or warmservercache runs again with redis up."
-                )
-            )
-            return
-        if count:
-            self.stdout.write(self.style.SUCCESS(f"Synced {count} host details to the cache."))
-        if rebuilt is not None:
-            self.stdout.write(self.style.SUCCESS(f"Rebuilt the cache for {rebuilt} hosts."))
 
     def add_host_details(self, filename):
         "Parses and stores data on database."
@@ -283,9 +254,12 @@ class Command(BaseCommand):
             fail2ban=fail2ban,
         )
         try:
-            cache_host_details(hd)
+            update_latest_hosts(
+                host.hostname, hd.id, hd.time, host.id, osdetails_name(osname, osrelease)
+            )
         except redis.RedisError as e:
-            # The row stays uncached; sync_cache() at the end retries it.
+            # The import itself succeeded; the /servers/ cache catches up when
+            # the app restarts (or run warmservercache).
             self.stderr.write(self.style.WARNING(f"Redis cache not updated for {hostname}: {e}"))
 
         self.stdout.write(self.style.SUCCESS(f"Successfully added {hostname}"))
