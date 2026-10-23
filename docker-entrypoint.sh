@@ -12,6 +12,10 @@ fi
 echo "Apply database migrations"
 python manage.py migrate
 
+# Rebuild the redis cache of the latest host details (the /servers/ index).
+echo "Warming the server cache"
+python manage.py warmservercache
+
 # Initial CSS build
 echo "Building styles"
 bash ./scripts/sass.sh build

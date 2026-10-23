@@ -17,7 +17,7 @@ from servers.models import (
     HostPackages,
     Package,
 )
-from servers.utils import update_latest_hosts
+from servers.utils import osdetails_name, update_latest_hosts
 
 # DB cache for runtime
 PACKAGES = {}
@@ -252,6 +252,8 @@ class Command(BaseCommand):
             ipv6=ipv6,
             fail2ban=fail2ban,
         )
-        update_latest_hosts(hd.host.hostname, hd.id, hd.time)
+        update_latest_hosts(
+            host.hostname, hd.id, hd.time, host.id, osdetails_name(osname, osrelease)
+        )
 
         self.stdout.write(self.style.SUCCESS(f"Successfully added {hostname}"))

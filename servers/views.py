@@ -1,6 +1,6 @@
-import json
-from typing import Any, DefaultDict
+import logging
 
+import redis
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import OuterRef, Subquery
@@ -20,7 +20,9 @@ from .models import (
     HostPackages,
     Package,
 )
-from .utils import generate_host_configurations_dict, get_osdetails
+from .utils import generate_host_configurations_dict, get_osdetails, osdetails_from_db
+
+logger = logging.getLogger(__name__)
 
 
 def logout_view(request):
@@ -148,28 +150,15 @@ def hosts(request):
 @login_required
 @permission_required("servers.view_host", raise_exception=True)
 def index(request):
-    # osdetails: dict[Any, Any] = get_osdetails()
-    # # HACK: To stop any error on the view for missing cache
-    # if not osdetails:
-    # osdetails = {}
-    # data = {}
-    # for k, v in osdetails.items():
-    # data[k.decode("utf-8")] = json.loads(v)
-    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(",")[0]
-    else:
-        ip = request.META.get("REMOTE_ADDR")
-    print(ip)
-    data = DefaultDict(list)
-    hosts_with_all_details = (
-        Host.objects.order_by("-id").distinct().prefetch_related("hostdetails_set")
-    )
-    for host in hosts_with_all_details:
-        ld = host.hostdetails_set.first()  # pyright: ignore
-        osdetails = f"{ld.osname}-{ld.osrelease}"
-        data[osdetails].append((host.hostname, host.id))
+    try:
+        osdetails = get_osdetails()
+    except redis.RedisError:
+        logger.warning("Redis unavailable, building the servers index from the database")
+        osdetails = {}
+    if not osdetails:
+        # Empty or unavailable cache: compute it (`warmservercache` refills it).
+        osdetails = osdetails_from_db()
 
     return render(
-        request, "servers/index.html", {"title": "Servers", "osdetails": dict(data)}
+        request, "servers/index.html", {"title": "Servers", "osdetails": osdetails}
     )
