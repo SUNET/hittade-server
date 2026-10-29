@@ -3,6 +3,7 @@ from django.core.paginator import Paginator
 from django.db.models import F, OuterRef, Subquery
 from django.shortcuts import redirect, render
 
+from hittade.downloads import json_download, wants_json
 from servers.models import HostContainers, HostContainersThrough
 
 from .forms import SearchForm
@@ -33,6 +34,20 @@ def package(request, pk):
             data["cid"] = cb.cid
         result.append(data)
 
+    if wants_json(request):
+        return json_download(
+            {
+                "package": {
+                    "name": package.name,
+                    "version": package.version,
+                    "provider": package.provider,
+                },
+                "containers": result,
+            },
+            "containers-with-package",
+            package.name,
+            package.version,
+        )
     return render(
         request,
         "containers/package.html",
@@ -40,6 +55,7 @@ def package(request, pk):
             "title": "Package details",
             "package": package, 
             "data": result,
+            "download": True,
         },
     ) 
 
@@ -74,15 +90,45 @@ def cbase(request, cid):
             .order_by("hc__host__hostname", "name")
         )
 
+    tags = cb.tags.all()
+    packages = cb.packages.all()
+    if wants_json(request):
+        data = {
+            "cid": cb.cid,
+            "name": cb.cname,
+            "tags": [t.fullname for t in tags],
+            "osname": cb.osname,
+            "osversionid": cb.osversionid,
+            "created_at": cb.ctime,
+            "scanned_at": cb.time,
+            "packages": [
+                {"name": p.name, "version": p.version, "provider": p.provider}
+                for p in packages
+            ],
+        }
+        if request.user.has_perm("servers.view_host"):
+            data["running_on"] = [
+                {
+                    "host": hc.hc.host.hostname,
+                    "host_id": hc.hc.host.id,
+                    "container": hc.name,
+                    "seen_at": hc.hc.time,
+                }
+                for hc in running
+            ]
+        # The image ID without "sha256:", shortened like docker does.
+        return json_download(data, "container", cb.cname, cb.cid.split(":")[-1][:12])
+
     return render(
         request, 
         "containers/container.html", 
         {
             "title": "Container details",
             "cb": cb, 
-            "tags": cb.tags.all(), 
-            "packages": cb.packages.all(),
+            "tags": tags, 
+            "packages": packages,
             "running": running,
+            "download": True,
         }
     )
 
@@ -90,6 +136,21 @@ def cbase(request, cid):
 @permission_required("containers.view_containerbase", raise_exception=True)
 def containers(request):
     cbs = ContainerBase.objects.prefetch_related("tags").order_by("-ctime")
+    if wants_json(request):
+        # All of them, not one page.
+        return json_download(
+            {
+                "containers": [
+                    {
+                        "cid": cb.cid,
+                        "tags": [t.fullname for t in cb.tags.all()],
+                        "created_at": cb.ctime,
+                    }
+                    for cb in cbs
+                ]
+            },
+            "containers",
+        )
     paginator = Paginator(cbs, 50)
 
     page_number = request.GET.get("page", 1)
@@ -111,6 +172,7 @@ def containers(request):
             "title": "All container images",
             "cbs": result, 
             "page": page,
+            "download": True,
         }
     )
 
@@ -164,6 +226,17 @@ def search(request):
     else:
         form = SearchForm()
 
+    if data and wants_json(request):
+        result = {"search": text, "type": stype}
+        if "packages" in data:
+            result["packages"] = [
+                {"id": p.id, "name": p.name, "version": p.version, "provider": p.provider}
+                for p in data["packages"]
+            ]
+        else:
+            result["containers"] = data["cbs"]
+        return json_download(result, "container-search", stype, text)
+
     return render(
         request, 
         "containers/search.html", 
@@ -173,5 +246,6 @@ def search(request):
             "data": data, 
             "text": text,
             "stype": stype,
+            "download": bool(data),
         }
     )

@@ -1,0 +1,18 @@
+/* The title of a page, with its actions (e.g. Download JSON) on the right. */
+.ht-page-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem 2rem;
+
+    > .heading {
+        flex: 1 1 20rem;
+        min-width: 0;
+    }
+
+    > .ht-download {
+        flex: none;
+        white-space: nowrap;
+    }
+}
