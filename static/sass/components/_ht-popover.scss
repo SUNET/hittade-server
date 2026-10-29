@@ -1,0 +1,50 @@
+/* A box opened with the popover attribute, e.g. help next to a search bar.
+   The browser places it on top and closes it with Esc or a click outside. */
+.ht-popover {
+    /* Centered; the reset removes the browser's own margin: auto. */
+    inset: 0;
+    margin: auto;
+    height: fit-content;
+    width: min(42rem, calc(100vw - 2rem));
+    max-height: calc(100vh - 2rem);
+    padding: 1.5rem 2rem;
+    overflow: auto;
+    border: 1px solid var(--ht-color--gray);
+    border-radius: var(--ht-border-radius);
+    background-color: var(--ht-color--white);
+    color: var(--ht-color--black);
+    box-shadow: var(--ht-box-shadow);
+
+    &::backdrop {
+        background-color: rgba(0, 0, 0, 0.25);
+    }
+
+    > .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+
+        > .close {
+            width: 2.25rem;
+            height: 2.25rem;
+            border: initial;
+            border-radius: 50%;
+            background-color: var(--ht-color--gray-light);
+            font-size: var(--ht-font-size--m);
+            line-height: 1;
+            cursor: pointer;
+
+            &:hover {
+                background-color: var(--ht-color--gray);
+            }
+        }
+    }
+
+    code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.9em;
+        white-space: nowrap;
+    }
+}

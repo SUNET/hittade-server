@@ -160,7 +160,8 @@ def running_containers(request):
     rows = []
     unknown = (0, 0)
     if text:
-        # "openssl" matches the package name, "openssl 3.0" the version too.
+        # "openssl" matches the package name, "openssl 3.0" the version too;
+        # both take * and ? wildcards, e.g. "python3*" or "openssl 3.*".
         words = text.split()
         version = words[1] if len(words) > 1 else ""
         rows, unknown = running_containers_with_package(words[0], version)

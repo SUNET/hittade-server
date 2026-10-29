@@ -4,9 +4,60 @@
     <div class="ht-container -narrow">
         <form action="{% url 'servers:running_containers' %}" method="get">
             <div class="ht-search-bar">
-                <input type="text" class="text" id="id_search" name="search" placeholder="Package name, optionally with a version" aria-label="Search packages in running containers" value="{{ text }}">
+                <input type="text" class="text" id="id_search" name="search" placeholder="Package name, optionally a version, e.g. python3* 3.11*" aria-label="Search packages in running containers" value="{{ text }}">
+                <button type="button" class="help" popovertarget="search-help" aria-label="Search help">?</button>
             </div>
         </form>
+        <div id="search-help" class="ht-popover" popover role="dialog" aria-labelledby="search-help-title">
+            <div class="header">
+                <h2 class="ht-heading -m" id="search-help-title">Search help</h2>
+                <button type="button" class="close" popovertarget="search-help" popovertargetaction="hide" aria-label="Close search help">&times;</button>
+            </div>
+            <p class="ht-text">
+                Type a package name, optionally followed by a version. In a pattern
+                with <code>*</code> (any text) or <code>?</code> (any one character)
+                the whole name or version must match; other characters match
+                themselves. Case does not matter.
+            </p>
+            <table class="ht-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Search</th>
+                        <th scope="col">Finds</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>python3*</code></td>
+                        <td>Names starting with python3</td>
+                    </tr>
+                    <tr>
+                        <td><code>*python*</code></td>
+                        <td>Names with python anywhere, e.g. dh-python</td>
+                    </tr>
+                    <tr>
+                        <td><code>*ssl3</code></td>
+                        <td>Names ending with ssl3</td>
+                    </tr>
+                    <tr>
+                        <td><code>libssl?</code></td>
+                        <td>libssl and one more character, e.g. libssl3</td>
+                    </tr>
+                    <tr>
+                        <td><code>python3* 3.11*</code></td>
+                        <td>Those names with a version starting with 3.11</td>
+                    </tr>
+                    <tr>
+                        <td><code>libc6 2.36-9+deb12u*</code></td>
+                        <td>Any deb12u build; . + ~ and : are plain text</td>
+                    </tr>
+                    <tr>
+                        <td><code>ssl</code></td>
+                        <td>Without a wildcard: ssl anywhere in the name</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
     <div class="ht-container">
         {% if rows %}
