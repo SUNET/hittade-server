@@ -56,11 +56,18 @@ class ContainerLinkTests(TestCase):
         self.assertContains(response, reverse("containers:cbase", args=[CID]))
         self.assertNotContains(response, reverse("containers:cbase", args=["sha256:bbbb"]))
 
+    def test_host_marks_scanned_containers(self):
+        user = user_with("view_host", "view_containerbase")
+        response = self.get(user, reverse("servers:host", args=[self.web.id]))
+        # Only the scanned image's row is highlighted.
+        self.assertContains(response, 'class="-linked"', count=1)
+
     def test_host_does_not_link_without_container_permission(self):
         user = user_with("view_host")
         response = self.get(user, reverse("servers:host", args=[self.web.id]))
         self.assertContains(response, "app:1")
         self.assertNotContains(response, reverse("containers:cbase", args=[CID]))
+        self.assertNotContains(response, 'class="-linked"')
 
     def test_container_lists_hosts_from_latest_scan(self):
         user = user_with("view_host", "view_containerbase")

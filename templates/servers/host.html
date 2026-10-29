@@ -83,14 +83,15 @@
             </thead>
             <tbody>
                 {% for hc in containers %}
-                <tr>
+                {% if hc.container.imageid in imported_cids and perms.containers.view_containerbase %}
+                <tr class="-linked">
                     <td>
-                        {% if hc.container.imageid in imported_cids and perms.containers.view_containerbase %}
                         <a href="{% url 'containers:cbase' hc.container.imageid %}">{{ hc.container.image }}</a>
-                        {% else %}
-                        {{ hc.container.image }}
-                        {% endif %}
                     </td>
+                {% else %}
+                <tr>
+                    <td>{{ hc.container.image }}</td>
+                {% endif %}
                     <td>{{ hc.container.imageid }}</td>
                     <td>{{ hc.name }}</td>
                 </tr>
