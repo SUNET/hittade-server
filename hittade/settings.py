@@ -177,6 +177,10 @@ REDIS = {
     "db": 0,
 }
 
+# Registries asked to turn the manifest digests some hosts report as image
+# IDs into config digests (see servers/registry.py).
+CONTAINER_REGISTRIES = ["docker.sunet.se", "platform.sunet.se"]
+
 
 # If we have a localsettings.py file, import everything from there and
 # use. Only a missing localsettings.py is ignored; errors raised inside it

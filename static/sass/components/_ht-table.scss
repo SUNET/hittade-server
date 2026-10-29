@@ -33,12 +33,11 @@
             background-color: var(--ht-color--gray-light); 
         }
 
-        /* A row that links to more details, e.g. a scanned container image. */
+        /* A row that links to more details, e.g. a scanned container image.
+           It keeps the zebra background; the bar and link mark it. */
         &.-linked {
-            background-color: var(--ht-color--info-light);
-
-            /* An accent bar; on the cell, as rows do not reliably draw shadows. */
             > td:first-child {
+                /* An accent bar; on the cell, as rows do not reliably draw shadows. */
                 box-shadow: inset 4px 0 0 var(--ht-color--info);
             }
 

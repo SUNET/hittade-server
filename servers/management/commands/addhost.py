@@ -7,6 +7,7 @@ import redis
 from django.core.management.base import BaseCommand
 from django.utils.dateparse import parse_datetime
 
+from containers.models import ContainerBase
 from servers.models import (
     ConfigValues,
     ContainerImage,
@@ -18,12 +19,31 @@ from servers.models import (
     HostPackages,
     Package,
 )
+from servers.registry import config_digest
 from servers.utils import osdetails_name, update_latest_hosts
 
 # DB cache for runtime
 PACKAGES = {}
 CONTAINERS = {}
 CONFIGVALUES = {}
+# (image, reported image ID) -> image ID to store
+IMAGEIDS = {}
+
+
+def image_config_id(image, image_id):
+    """The config digest for an image ID a host reports.
+
+    Hosts using the containerd image store report the manifest digest; the
+    registry tells its config digest, which is what container scans use.
+    """
+    key = (image, image_id)
+    if key not in IMAGEIDS:
+        if ContainerBase.objects.filter(cid=image_id).exists():
+            # Matches a scan, so it already is a config digest.
+            IMAGEIDS[key] = image_id
+        else:
+            IMAGEIDS[key] = config_digest(image, image_id) or image_id
+    return IMAGEIDS[key]
 
 
 class Command(BaseCommand):
@@ -228,7 +248,7 @@ class Command(BaseCommand):
 
         for container in values.get("docker_ps", []):
             image = container["Image"]
-            image_id = container.get("ImageId", "not_available")
+            image_id = image_config_id(image, container.get("ImageId", "not_available"))
             c, _ = ContainerImage.objects.get_or_create(image=image, imageid=image_id)
             # Save the container details
             hct = HostContainersThrough(
