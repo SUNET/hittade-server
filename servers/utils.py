@@ -181,6 +181,30 @@ def generate_host_configurations_dict(input: list) -> dict:
 
     return configurations
 
+def latest_running_containers():
+    """HostContainersThrough rows of the latest docker ps scan of every host.
+
+    The latest scan of each host is looked up once per host, not per row.
+    """
+    from .models import Host, HostContainers, HostContainersThrough
+
+    latest_hc_ids = Host.objects.annotate(
+        latest_hc=Subquery(
+            HostContainers.objects.filter(host=OuterRef("pk"))
+            .order_by("-time")
+            .values("id")[:1]
+        )
+    ).values("latest_hc")
+    return HostContainersThrough.objects.filter(hc_id__in=latest_hc_ids)
+
+
+def image_with_tag(image: str) -> str:
+    "docker.sunet.se/foo -> docker.sunet.se/foo:latest; tagged or digest refs unchanged."
+    if "@" in image or ":" in image.rsplit("/", 1)[-1]:
+        return image
+    return f"{image}:latest"
+
+
 def running_containers_with_package(name: str, version: str = ""):
     """Running containers whose image has a package matching name (and version).
 
@@ -193,18 +217,8 @@ def running_containers_with_package(name: str, version: str = ""):
     """
     from containers.models import ContainerBase, ContainerPackage
 
-    from .models import Host, HostContainers, HostContainersThrough
-
-    # The latest docker ps scan of every host, looked up once per host.
-    latest_hc_ids = Host.objects.annotate(
-        latest_hc=Subquery(
-            HostContainers.objects.filter(host=OuterRef("pk"))
-            .order_by("-time")
-            .values("id")[:1]
-        )
-    ).values("latest_hc")
     running = list(
-        HostContainersThrough.objects.filter(hc_id__in=latest_hc_ids)
+        latest_running_containers()
         .select_related("hc__host", "container")
         .order_by("hc__host__hostname", "name")
     )
