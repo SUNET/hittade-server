@@ -1,7 +1,7 @@
 [project]
 name = "hittade-server"
 authors = [{name = "Kushal Das", email = "kushal@sunet.se"}]
-version = "0.1.0"
+version = "0.2.0"
 description = "Django web application to show the state of various hosts and containers"
 readme = "README.md"
 license = { file = "LICENSE" }
