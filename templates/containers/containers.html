@@ -1,6 +1,65 @@
 {% extends "dashboard.html" %}
 
 {% block content %}
+    {# Filter by the OS of running containers (see containers.views.containers). #}
+    <div class="ht-container">
+        {# GET to the page it is on, so the filter can be bookmarked and the Download JSON button keeps it. #}
+        <form class="ht-filter" action="{{ request.path }}" method="get">
+            <label class="label" for="id_os">OS of running containers</label>
+            <select class="select" id="id_os" name="os">
+                <option value="">All container images</option>
+                {# One group per OS name; each option is "<osname>|<osversionid>". #}
+                {% for osname, versions in os_versions %}
+                    <optgroup label="{{ osname|default:'(no OS name)' }}">
+                        {% for version, count in versions %}
+                            {% with value=osname|add:"|"|add:version %}
+                                <option value="{{ value }}"{% if value == os_choice %} selected{% endif %}>{{ osname }} {{ version|default:"(no version)" }} ({{ count }})</option>
+                            {% endwith %}
+                        {% endfor %}
+                    </optgroup>
+                {% endfor %}
+            </select>
+            <button type="submit" class="ht-button">Show</button>
+        </form>
+    </div>
+    {% if os_choice %}
+    {# The running images with the chosen OS version. #}
+    <div class="ht-container">
+        <h2 class="ht-heading -m _mb">Running containers with {{ osname|default:"(no OS name)" }} {{ osversionid|default:"(no version)" }}: <span class="ht-badge -info">{{ images|length }}</span></h2>
+        <div class="ht-scrollable">
+            <table class="ht-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Container</th>
+                        <th scope="col">Hosts running it</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for image in images %}
+                    <tr>
+                        <td>
+                            {# One line per tag, all for the same image. #}
+                            <ul class="ht-unordered-list -plain">
+                                {% for tag in image.tags %}
+                                    <li><a href="{% url 'containers:cbase' image.cid %}">{{ tag }}</a></li>
+                                {% empty %}
+                                    <li><a href="{% url 'containers:cbase' image.cid %}">{{ image.cid }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td>{{ image.hosts }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2">No running container has this OS version.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    {# No filter: every container image, a page at a time. #}
     <div class="ht-container">
         <div class="ht-scrollable">
             <table class="ht-table">
@@ -27,17 +86,19 @@
         {% if page.has_other_pages %}
             <div class="ht-pagination">
                 {% if page.has_previous %}
-                    <a class="nav -prev" href="{% url 'containers:containers' %}?page={{page.previous_page_number}}" aria-label="Go to the previous page of containers">Prev</a>
+                    {# querystring keeps the page on the URL it is on, /containers/ or /containers/containers. #}
+                    <a class="nav -prev" href="{% querystring page=page.previous_page_number %}" aria-label="Go to the previous page of containers">Prev</a>
                 {% else %}
                     <span class="nav -prev -disabled">Prev</span>
                 {% endif %}
                 <span>{{ page }}</span>
                 {% if page.has_next %}
-                    <a class="nav -next" href="{% url 'containers:containers' %}?page={{page.next_page_number}}" aria-label="Go to the next page to see more containers">Next</a>
+                    <a class="nav -next" href="{% querystring page=page.next_page_number %}" aria-label="Go to the next page to see more containers">Next</a>
                 {% else %}
                     <span class="nav -next -disabled">Next</span>
                 {% endif %}
             </div>
         {% endif %}
     </div>
+    {% endif %}
 {% endblock %}

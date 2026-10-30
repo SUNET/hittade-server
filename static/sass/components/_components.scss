@@ -6,11 +6,14 @@
 @use 'ht-dashboard-header';
 @use 'ht-dashboard';
 @use 'ht-details';
+@use 'ht-filter';
 @use 'ht-flex';
 @use 'ht-heading_ht-text';
 @use 'ht-notice';
 @use 'ht-ordered-list';
+@use 'ht-page-header';
 @use 'ht-pagination';
+@use 'ht-popover';
 @use 'ht-scrollable';
 @use 'ht-search-bar';
 @use 'ht-selector';

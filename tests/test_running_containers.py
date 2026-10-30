@@ -62,6 +62,28 @@ class RunningContainersTests(TestCase):
         response = self.search("openssl 3.0")
         self.assertEqual(self.rows(response), [("web1", "app", "openssl", "3.0.2")])
 
+    def test_wildcards_match_the_whole_value(self):
+        for text, expected in [
+            ("open*", [("db1", "db", "openssl", "1.1.1"), ("web1", "app", "openssl", "3.0.2")]),
+            ("*ssl3", [("web1", "app", "libssl3", "3.0.2")]),
+            ("*SSL*", [
+                ("db1", "db", "openssl", "1.1.1"),
+                ("web1", "app", "libssl3", "3.0.2"),
+                ("web1", "app", "openssl", "3.0.2"),
+            ]),
+            ("ssl*", []),
+            ("openss?", [("db1", "db", "openssl", "1.1.1"), ("web1", "app", "openssl", "3.0.2")]),
+            ("openssl 3.*", [("web1", "app", "openssl", "3.0.2")]),
+            ("* *.1.1", [("db1", "db", "openssl", "1.1.1")]),
+            # Only * and ? are special; "." is a dot.
+            ("openssl 3.0?2", [("web1", "app", "openssl", "3.0.2")]),
+            ("openssl 3?0*", [("web1", "app", "openssl", "3.0.2")]),
+            ("op.nssl*", []),
+            ("openssl [13]*", []),
+        ]:
+            with self.subTest(text=text):
+                self.assertEqual(self.rows(self.search(text)), expected)
+
     def test_reports_containers_without_imported_image(self):
         response = self.search("bash")
         self.assertEqual(self.rows(response), [("db1", "db", "bash", "5.1")])
@@ -79,6 +101,12 @@ class RunningContainersTests(TestCase):
         response = self.search("")
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "No running container")
+
+    def test_help_button_opens_the_help(self):
+        response = self.search("")
+        self.assertContains(response, 'popovertarget="search-help"', count=2)
+        self.assertContains(response, 'id="search-help" class="ht-popover" popover')
+        self.assertContains(response, "<td><code>python3*</code></td>", html=False)
 
     def test_needs_both_permissions(self):
         for codename in ("view_host", "view_containerbase"):

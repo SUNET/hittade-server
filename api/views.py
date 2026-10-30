@@ -6,6 +6,7 @@ from ninja.pagination import LimitOffsetPagination, paginate
 from ninja.security import APIKeyHeader
 
 from servers.models import Host, HostConfigs, HostContainers, HostDetails, HostPackages
+from servers.utils import image_with_tag, latest_running_containers
 
 from .models import APIKey
 
@@ -73,6 +74,17 @@ class CombinedHostSchema(Schema):
 @paginate(LimitOffsetPagination)
 def list_hosts(request):
     return Host.objects.all().order_by("hostname")
+
+
+@api.get("/containers/running", response=list[str])
+def running_images(request):
+    """Every image (name:tag) running on a host, by the latest scan of each host.
+
+    Sorted and without duplicates; an image without a tag is listed as
+    name:latest, which is what docker runs for it.
+    """
+    images = latest_running_containers().values_list("container__image", flat=True)
+    return sorted({image_with_tag(image) for image in images if image})
 
 
 @api.get("/host/{host_id}/config", response=list[HostConfigurationSchema])

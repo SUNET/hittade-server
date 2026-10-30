@@ -171,3 +171,4 @@ db*
 # Bundled assets
 /static/css
 .envrc
+invent/

@@ -35,6 +35,26 @@
         
     }
 
+    /* A round "?" that opens the help for the search. */
+    > .help {
+        align-self: center;
+        width: 2.25rem;
+        height: 2.25rem;
+        margin-right: 10px;
+        border: 2px solid currentColor;
+        border-radius: 50%;
+        background-color: var(--ht-color--white);
+        font-family: inherit;
+        font-size: var(--ht-font-size--s);
+        font-weight: 700;
+        cursor: pointer;
+
+        &:hover {
+            background-color: var(--ht-color--black);
+            color: var(--ht-color--white);
+        }
+    }
+
     > .category {
         position: relative;
         -moz-appearance:none;

@@ -1,0 +1,16 @@
+{# The "Download JSON" button of a page; see hittade/downloads.py. #}
+{% if request.method == "POST" %}
+    {# Search results come from a POST, so send the same form again. #}
+    <form method="post" class="ht-download">
+        {% csrf_token %}
+        {% for key, value in request.POST.items %}
+            {% if key != "csrfmiddlewaretoken" and key != "format" %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+            {% endif %}
+        {% endfor %}
+        <input type="hidden" name="format" value="json">
+        <button type="submit" class="ht-button -outline">Download JSON</button>
+    </form>
+{% else %}
+    <a class="ht-download ht-button -outline" href="{% querystring format='json' page=None %}">Download JSON</a>
+{% endif %}

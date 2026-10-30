@@ -1,11 +1,12 @@
 import json
+import re
 import uuid
 from collections import defaultdict
 from datetime import UTC, datetime
 
 import redis
 from django.conf import settings
-from django.db.models import OuterRef, Subquery
+from django.db.models import OuterRef, Q, Subquery
 
 redis_conf = settings.REDIS
 
@@ -181,8 +182,50 @@ def generate_host_configurations_dict(input: list) -> dict:
 
     return configurations
 
+def latest_running_containers():
+    """HostContainersThrough rows of the latest docker ps scan of every host.
+
+    The latest scan of each host is looked up once per host, not per row.
+    """
+    from .models import Host, HostContainers, HostContainersThrough
+
+    latest_hc_ids = Host.objects.annotate(
+        latest_hc=Subquery(
+            HostContainers.objects.filter(host=OuterRef("pk"))
+            .order_by("-time")
+            .values("id")[:1]
+        )
+    ).values("latest_hc")
+    return HostContainersThrough.objects.filter(hc_id__in=latest_hc_ids)
+
+
+def image_with_tag(image: str) -> str:
+    "docker.sunet.se/foo -> docker.sunet.se/foo:latest; tagged or digest refs unchanged."
+    if "@" in image or ":" in image.rsplit("/", 1)[-1]:
+        return image
+    return f"{image}:latest"
+
+
+def wildcard_q(field: str, pattern: str) -> Q:
+    """Q for field matching pattern, ignoring case.
+
+    In a pattern with a wildcard, * matches any text and ? any one character,
+    and the whole value must match: "python3*" starts with python3 and
+    "*python*" has it anywhere. Other characters match themselves. A pattern
+    without a wildcard matches anywhere in the value.
+    """
+    if "*" not in pattern and "?" not in pattern:
+        return Q(**{f"{field}__icontains": pattern})
+    regex = "".join(
+        ".*" if c == "*" else "." if c == "?" else re.escape(c) for c in pattern
+    )
+    return Q(**{f"{field}__iregex": f"^{regex}$"})
+
+
 def running_containers_with_package(name: str, version: str = ""):
     """Running containers whose image has a package matching name (and version).
+
+    name and version are wildcard_q patterns.
 
     Only the latest docker ps scan of every host counts, and a container is
     matched through its image ID, which is ContainerBase.cid of an imported
@@ -193,18 +236,8 @@ def running_containers_with_package(name: str, version: str = ""):
     """
     from containers.models import ContainerBase, ContainerPackage
 
-    from .models import Host, HostContainers, HostContainersThrough
-
-    # The latest docker ps scan of every host, looked up once per host.
-    latest_hc_ids = Host.objects.annotate(
-        latest_hc=Subquery(
-            HostContainers.objects.filter(host=OuterRef("pk"))
-            .order_by("-time")
-            .values("id")[:1]
-        )
-    ).values("latest_hc")
     running = list(
-        HostContainersThrough.objects.filter(hc_id__in=latest_hc_ids)
+        latest_running_containers()
         .select_related("hc__host", "container")
         .order_by("hc__host__hostname", "name")
     )
@@ -213,9 +246,9 @@ def running_containers_with_package(name: str, version: str = ""):
         ContainerBase.objects.filter(cid__in=imageids).values_list("cid", flat=True)
     )
 
-    packages = ContainerPackage.objects.filter(name__icontains=name)
+    packages = ContainerPackage.objects.filter(wildcard_q("name", name))
     if version:
-        packages = packages.filter(version__icontains=version)
+        packages = packages.filter(wildcard_q("version", version))
     # imageid -> matching (name, version) of the packages in that image.
     matches = defaultdict(set)
     for cid, pname, pversion in ContainerBase.packages.through.objects.filter(

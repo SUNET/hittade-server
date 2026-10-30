@@ -1,0 +1,30 @@
+/* A one-line filter form: label, select and submit button. It wraps onto
+   more lines on narrow screens. Used for the OS filter of /containers/. */
+.ht-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .75rem 1rem;
+
+    > .label {
+        font-weight: 600;
+    }
+
+    /* Looks like the gray, rounded ht-search-bar. */
+    > .select {
+        min-width: 16rem;
+        padding: 14px 15px;
+        border: initial;
+        border-radius: var(--ht-border-radius);
+        background-color: var(--ht-color--gray);
+        font-family: inherit;
+        font-size: var(--ht-font-size--s);
+        font-weight: 600;
+    }
+
+    /* Buttons do not inherit the page font by default. */
+    > .ht-button {
+        font-family: inherit;
+        cursor: pointer;
+    }
+}
