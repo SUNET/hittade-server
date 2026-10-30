@@ -8,7 +8,7 @@ from servers.models import HostContainers, HostContainersThrough
 
 from .forms import SearchForm
 from .models import ContainerBase, ContainerPackage, ContainerTags
-from .utils import latest_containers
+from .utils import latest_containers, running_images_with_os, running_os_versions
 
 # Create your views here.
 
@@ -135,6 +135,41 @@ def cbase(request, cid):
 @login_required
 @permission_required("containers.view_containerbase", raise_exception=True)
 def containers(request):
+    """Container images, with a filter by the OS of the running ones.
+
+    Without a filter: every container image, newest first, 50 a page. With
+    ?os=<osname>|<osversionid> (e.g. "debian|12.7"): the images running on
+    hosts with that OS name and version, from running_images_with_os. Both
+    take format=json for the Download JSON button.
+    """
+    # The filter's options, shown on both kinds of page.
+    os_versions = running_os_versions()
+    os_choice = request.GET.get("os", "")
+    if os_choice:
+        # An empty part is a missing name or version, e.g. "debian|".
+        osname, _, osversionid = os_choice.partition("|")
+        images = running_images_with_os(osname, osversionid)
+        if wants_json(request):
+            return json_download(
+                {"osname": osname, "osversionid": osversionid, "containers": images},
+                "running-images",
+                osname,
+                osversionid,
+            )
+        return render(
+            request,
+            "containers/containers.html",
+            {
+                "title": "Running container images",
+                "os_versions": os_versions,
+                "os_choice": os_choice,
+                "osname": osname,
+                "osversionid": osversionid,
+                "images": images,
+                "download": True,
+            },
+        )
+
     cbs = ContainerBase.objects.prefetch_related("tags").order_by("-ctime")
     if wants_json(request):
         # All of them, not one page.
@@ -172,6 +207,7 @@ def containers(request):
             "title": "All container images",
             "cbs": result, 
             "page": page,
+            "os_versions": os_versions,
             "download": True,
         }
     )

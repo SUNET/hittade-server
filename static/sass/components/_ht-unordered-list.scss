@@ -7,5 +7,12 @@
     display: flex;
     flex-direction: column;
     gap: .5rem;
+
+    /* Items one per line, without bullets, e.g. the tags of an image in a table cell. */
+    &.-plain {
+        margin: 0;
+        padding-left: 0;
+        list-style-type: none;
+        gap: .25rem;
+    }
 }
-  
